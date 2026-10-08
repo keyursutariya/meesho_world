@@ -103,35 +103,7 @@
         <div id="upi-body" class="accordion-body open" style="padding:0 .75rem .75rem">
           <div id="payment-apps-list"></div>
 
-          <!-- Manual UPI ID Entry Option -->
-          <label class="payment-app-label" id="app-label-manualupi" onclick="selectApp('manualupi')" style="margin-top:.5rem;border:1px dashed #cbd5e1;border-radius:.5rem">
-            <div class="flex gap-3" style="min-width:0">
-              <div style="width:2.5rem;height:2.5rem;border-radius:.5rem;background:#6366f1;flex-shrink:0;display:flex;align-items:center;justify-content:center">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h4m4 0h-1"/><path d="M2 9h20"/></svg>
-              </div>
-              <div style="min-width:0">
-                <span style="font-size:.875rem;font-weight:600;display:block">Enter UPI ID</span>
-                <p style="font-size:.625rem;color:var(--muted-foreground);margin-top:.15rem;line-height:1.3">Pay directly using any UPI ID (e.g. name@okaxis)*</p>
-              </div>
-            </div>
-            <input type="radio" name="payment-app" value="manualupi" onchange="selectApp('manualupi')" style="margin-top:.2rem;width:1rem;height:1rem;accent-color:var(--primary);flex-shrink:0"/>
-          </label>
 
-          <!-- Manual UPI Input Box -->
-          <div id="manual-upi-box" style="display:none;margin-top:.625rem;padding:.875rem;background:#f8fafc;border-radius:.625rem;border:1px solid #e2e8f0">
-            <label style="font-size:.75rem;font-weight:700;color:#0f172a;display:block;margin-bottom:.375rem">Your UPI ID <span style="font-weight:400;color:#64748b">(to open your UPI app)</span></label>
-            <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="text" id="manual-upi-input" placeholder="e.g. yourname@okaxis" autocomplete="off" autocapitalize="none" style="flex:1;padding:.625rem .75rem;border:1.5px solid #cbd5e1;border-radius:.5rem;font-size:.875rem;outline:none;font-family:inherit" oninput="validateManualUpi(this.value)" onfocus="this.style.borderColor='#9f2089'" onblur="this.style.borderColor='#cbd5e1'"/>
-              <button onclick="verifyAndCopyUpiId()" style="padding:.625rem .875rem;background:#9f2089;color:#fff;border:none;border-radius:.5rem;font-size:.8125rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap">Verify</button>
-            </div>
-            <p id="manual-upi-error" style="font-size:.6875rem;color:var(--destructive);margin-top:.25rem;display:none">Enter a valid UPI ID (e.g. name@okaxis)</p>
-            <p id="manual-upi-ok" style="font-size:.6875rem;color:#038c63;font-weight:600;margin-top:.25rem;display:none">✅ UPI ID looks valid! Click PAY NOW to proceed.</p>
-            <div style="margin-top:.625rem;padding:.5rem .625rem;background:#fffbeb;border:1px solid #fcd34d;border-radius:.375rem">
-              <p style="font-size:.6875rem;color:#92400e;font-weight:600">📌 Payment goes to: <span style="color:#0f172a">paytm.s3av79p@pty (Vipulbhai Kumbhani)</span></p>
-              <p style="font-size:.625rem;color:#92400e;margin-top:.15rem">Your UPI ID is only used to open your preferred app.</p>
-            </div>
-            <p style="font-size:.6875rem;color:var(--muted-foreground);margin-top:.375rem">Popular: @okaxis, @oksbi, @okicici, @ybl, @ibl, @axl, @paytm, @ptyes</p>
-          </div>
 
           <!-- QR Code -->
           <div id="qr-section" style="display:none;padding:1rem;border:1.5px solid #cbd5e1;border-radius:12px;margin-top:.75rem;background:#ffffff;text-align:center">
@@ -146,10 +118,7 @@
       <!-- Disabled options -->
       <div id="disabled-options"></div>
 
-      <!-- Info notice -->
-      <div style="padding:.75rem 1rem;background:var(--muted);border-top:1px solid var(--border)">
-        <p style="font-size:.625rem;text-align:center;color:var(--muted-foreground)">Secure P2P transfer directly to UPI: <span id="upi-vpa-notice"></span></p>
-      </div>
+
     </div>
 
     <!-- Resell -->
@@ -211,7 +180,6 @@
       document.getElementById('footer-total').textContent = pricing.orderTotal;
       document.getElementById('pd-total').textContent   = `₹${pricing.orderTotal}`;
       document.getElementById('pd-grand').textContent   = `₹${pricing.orderTotal}`;
-      document.getElementById('upi-vpa-notice').textContent = window.PaymentConfig.UPI_VPA;
       document.getElementById('price-detail-heading').textContent = `Price Details (${totalItems} Item${totalItems !== 1 ? 's' : ''})`;
 
       const savedEl = document.getElementById('pay-saved');
@@ -227,7 +195,7 @@
         <label class="payment-app-label${app.id === selectedApp ? ' selected' : ''}" id="app-label-${app.id}" onclick="selectApp('${app.id}')">
           <div class="flex gap-3" style="min-width:0">
             <div style="width:2.5rem;height:2.5rem;border-radius:.5rem;background:${app.logoBg};flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
-              ${app.icon ? `<img src="${app.icon}" alt="${app.label}" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='<span style=color:#fff;font-weight:700;font-size:.625rem>${app.label[0]}</span>'"/>` : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>`}
+              ${app.icon ? `<img src="${app.icon}" alt="${app.label}" style="width:100%;height:100%;object-fit:contain;border-radius:.5rem;transform:scale(${app.imgScale || 1})" onerror="this.parentElement.innerHTML='<span style=color:#fff;font-weight:700;font-size:.625rem>${app.label[0]}</span>'"/>` : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>`}
             </div>
             <div style="min-width:0">
               <span style="font-size:.875rem;font-weight:600;display:block">${app.label}</span>
@@ -262,43 +230,20 @@
       if (radio) radio.checked = true;
 
       const qrSec     = document.getElementById('qr-section');
-      const manualBox = document.getElementById('manual-upi-box');
 
       // Reset visibility
       qrSec.style.display     = 'none';
-      manualBox.style.display = 'none';
 
       if (appId === 'qr') {
         qrSec.style.display = 'block';
         renderQr();
         document.getElementById('proceed-btn').innerHTML = 'I HAVE PAID <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
-      } else if (appId === 'manualupi') {
-        manualBox.style.display = 'block';
-        document.getElementById('proceed-btn').innerHTML = 'PAY NOW <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
-        setTimeout(() => document.getElementById('manual-upi-input').focus(), 100);
       } else {
         document.getElementById('proceed-btn').innerHTML = 'PROCEED TO PAY <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
       }
     }
 
-    function validateManualUpi(val) {
-      const errEl = document.getElementById('manual-upi-error');
-      const okEl  = document.getElementById('manual-upi-ok');
-      const valid = /^[a-zA-Z0-9._-]+@[a-zA-Z]+$/.test(val.trim());
-      errEl.style.display = (!valid && val.length > 0) ? '' : 'none';
-      okEl.style.display  = (valid) ? '' : 'none';
-      return valid;
-    }
 
-    function verifyAndCopyUpiId() {
-      const val = document.getElementById('manual-upi-input').value.trim();
-      if (!validateManualUpi(val)) {
-        document.getElementById('manual-upi-error').style.display = '';
-        return;
-      }
-      navigator.clipboard.writeText(val).catch(() => {});
-      alert(`✅ UPI ID "${val}" verified!\nNow click PAY NOW and complete the payment in your UPI app.`);
-    }
 
     function renderQr() {
       const wrap = document.getElementById('qr-canvas-wrap');
@@ -357,64 +302,6 @@
       const addr  = window.DeliveryAddress.load();
       if (!items.length || !addr) return;
 
-      // Manual UPI: customer enters their own UPI ID to open their app
-      // but pa= (destination) is ALWAYS the seller's Paytm VPA
-      if (selectedApp === 'manualupi') {
-        const customerUpiVal = document.getElementById('manual-upi-input').value.trim();
-        if (!validateManualUpi(customerUpiVal)) {
-          document.getElementById('manual-upi-error').style.display = '';
-          document.getElementById('manual-upi-input').focus();
-          return;
-        }
-        createPendingOrder();
-
-        // Always pay TO seller's Paytm VPA
-        const sellerVpa = window.PaymentConfig.UPI_VPA;
-        const payeeName = window.PaymentConfig.PAYEE_NAME;
-        const amount    = pricing.orderTotal;
-
-        // Detect app from customer's suffix to open right intent on Android
-        const device = window.UpiPayment.detectDevice();
-        if (device === 'and') {
-          const suffix = customerUpiVal.split('@')[1] || '';
-          let intentUrl;
-          if (suffix.includes('okaxis') || suffix.includes('axl') || suffix.includes('ibl')) {
-            intentUrl = `intent://pay?pa=${encodeURIComponent(sellerVpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end`;
-          } else if (suffix.includes('ybl') || suffix.includes('okbizaxis')) {
-            intentUrl = `intent://pay?pa=${encodeURIComponent(sellerVpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
-          } else if (suffix.includes('paytm') || suffix.includes('ptyes') || suffix.includes('pty')) {
-            intentUrl = `paytmmp://pay?pa=${encodeURIComponent(sellerVpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
-          } else {
-            // Generic UPI deep link — works with any UPI app chooser
-            intentUrl = `upi://pay?pa=${encodeURIComponent(sellerVpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
-          }
-          window.UpiPayment.navLink(intentUrl);
-          awaitingReturn = true;
-          const onVisible = () => {
-            if (!document.hidden) {
-              document.removeEventListener('visibilitychange', onVisible);
-              if (awaitingReturn) { awaitingReturn = false; openConfirmDialog(); }
-            }
-          };
-          document.addEventListener('visibilitychange', onVisible);
-        } else if (device === 'ios') {
-          // iOS: generic UPI link — always to seller
-          window.UpiPayment.navLink(`upi://pay?pa=${encodeURIComponent(sellerVpa)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`);
-          awaitingReturn = true;
-          const onVisible = () => {
-            if (!document.hidden) {
-              document.removeEventListener('visibilitychange', onVisible);
-              if (awaitingReturn) { awaitingReturn = false; openConfirmDialog(); }
-            }
-          };
-          document.addEventListener('visibilitychange', onVisible);
-        } else {
-          // Desktop: show QR + confirm dialog
-          selectApp('qr');
-          setTimeout(() => openConfirmDialog(), 400);
-        }
-        return;
-      }
 
       if (selectedApp === 'qr') { createPendingOrder(); openConfirmDialog(); return; }
 

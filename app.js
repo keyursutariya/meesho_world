@@ -102,8 +102,10 @@ window.PaymentConfig = {
     { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
     { id:'paytm',      label:'Paytm',        logoBg:'#00baf2', icon:'images/payment/paytm.png',      subtitle:'₹30–₹300 Cashback for first-time and dormant Paytm UPI users*' },
-    { id:'bharatpe',   label:'BharatPe',     logoBg:'#00a7ba', icon:'images/payment/bharatpe.png',   subtitle:'Fast & secure zero-fee payment with BharatPe UPI*' },
-    { id:'amazonpay',  label:'Amazon Pay',   logoBg:'#ff9900', icon:'images/payment/amazonpay.jpg',  subtitle:'Pay with Amazon Pay UPI and earn rewards on every transaction*' },
+    { id:'bharatpe',   label:'BharatPe',     logoBg:'#ffffff', icon:'images/payment/bharatpe.png',   subtitle:'Fast & secure zero-fee payment with BharatPe UPI*' },
+    { id:'amazonpay',  label:'Amazon Pay',   logoBg:'#ffffff', icon:'images/payment/amazonpay.png',  subtitle:'Pay with Amazon Pay UPI and earn rewards on every transaction*', imgScale: 1.4 },
+    { id:'supermoney', label:'Super.money',  logoBg:'#5a2d91', icon:'images/payment/supermoney.jpg', subtitle:'Pay fast & securely via Super.money (by Flipkart) UPI app*' },
+    { id:'bhim',       label:'BHIM UPI',     logoBg:'#ffffff', icon:'images/payment/upi-npci.png',   subtitle:'Official BHIM UPI App by NPCI*', imgScale: 1.4 },
   ],
   DISABLED_OPTIONS: [
     { id:'wallet',     label:'Wallet' },
@@ -171,7 +173,7 @@ window.UpiPayment = {
     const rawVpa = window.PaymentConfig.UPI_VPA;
 
     // UPI apps that need deep link handling
-    const upiApps = ['phonepe','gpay','paytm','bharatpe','amazonpay','cred','ippb','manualupi'];
+    const upiApps = ['gpay','phonepe','paytm','bharatpe','amazonpay','cred','ippb','supermoney','bhim'];
 
     if (upiApps.includes(method)) {
       if (device === 'and') {
@@ -190,10 +192,13 @@ window.UpiPayment = {
           this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dreamplug.androidapp;end`);
         } else if (method === 'ippb') {
           this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dop.ippbretail;end`);
+        } else if (method === 'supermoney') {
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`);
+        } else if (method === 'bhim') {
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`);
         } else {
-          // manualupi or fallback — show confirm dialog directly
-          callbacks.onQrOnly && callbacks.onQrOnly();
-          return;
+          // fallback — generic UPI chooser
+          this.navLink(`upi://pay?pa=${rawVpa}&pn=${pn}&am=${amount}&cu=INR`);
         }
       } else if (device === 'ios') {
         if (method === 'phonepe') {
@@ -202,19 +207,12 @@ window.UpiPayment = {
           this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
         } else if (method === 'amazonpay') {
           this.navLink(`amzn://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
-        } else if (method === 'manualupi') {
-          callbacks.onQrOnly && callbacks.onQrOnly();
-          return;
         } else {
           this.navLink(`upi://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
         }
       } else {
-        // Desktop — show QR fallback for app-based methods, confirm dialog for manual UPI
-        if (method === 'manualupi') {
-          callbacks.onQrOnly && callbacks.onQrOnly();
-        } else {
-          callbacks.onDesktopQrFallback && callbacks.onDesktopQrFallback();
-        }
+        // Desktop — show QR fallback for app-based methods
+        callbacks.onDesktopQrFallback && callbacks.onDesktopQrFallback();
         return;
       }
       const onVisible = () => {

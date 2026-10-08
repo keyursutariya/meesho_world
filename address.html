@@ -18,23 +18,116 @@
     .form-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .form-section-title { display: flex; align-items: center; gap: .5rem; font-size: .9375rem; font-weight: 700; color: #0f172a; }
     .field-wrap { margin-bottom: .875rem; }
+
+    /* Base input style */
+    #address-form .floating-group input.input-dark,
+    #address-form .floating-group select.input-dark,
     .input-dark {
       background: #ffffff !important;
       color: #0f172a !important;
-      border: 1px solid #cbd5e1 !important;
+      border: 1.5px solid #cbd5e1 !important;
       border-radius: 8px !important;
-      height: 2.875rem !important;
+      height: 3.25rem !important;
       font-size: 0.875rem !important;
       font-weight: 500 !important;
-      padding: 0 0.875rem !important;
+      padding: 1.25rem 0.875rem 0.25rem 0.875rem !important;
       box-shadow: none !important;
+      outline: none !important;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+      width: 100%;
+      box-sizing: border-box;
+      appearance: none;
     }
+    #address-form .floating-group select.input-dark {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1rem;
+    }
+    #address-form input.input-dark::placeholder,
+    .input-dark::placeholder {
+      color: transparent !important;
+    }
+    /* Floating Labels */
+    .floating-group {
+      position: relative;
+      margin-bottom: .875rem;
+    }
+    .floating-label {
+      position: absolute;
+      top: 50%;
+      left: 0.875rem;
+      transform: translateY(-50%);
+      font-size: 0.875rem;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+    .floating-group input.input-dark:focus ~ .floating-label,
+    .floating-group input.input-dark:not(:placeholder-shown) ~ .floating-label,
+    .floating-group select.input-dark:focus ~ .floating-label,
+    .floating-group select.input-dark:valid ~ .floating-label {
+      top: 0.75rem;
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: #9f2089;
+    }
+    .floating-group input.input-dark:not(:focus):not(:placeholder-shown) ~ .floating-label,
+    .floating-group select.input-dark:not(:focus):valid ~ .floating-label {
+      color: #64748b;
+    }
+    /* Custom Dropdown Styles */
+    .custom-select-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 50;
+      display: none;
+    }
+    .custom-select-dropdown.show {
+      display: block;
+    }
+    .custom-option {
+      padding: 12px 14px;
+      font-size: 0.875rem;
+      color: #0f172a;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .custom-option:last-child {
+      border-bottom: none;
+    }
+    .custom-option:hover {
+      background: #f8fafc;
+      color: #9f2089;
+    }
+    .custom-select-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    #address-form input.input-dark::placeholder,
     .input-dark::placeholder {
       color: #94a3b8 !important;
     }
-    .input-dark:focus {
-      border-color: #9f2089 !important;
-      box-shadow: 0 0 0 3px rgba(159, 32, 137, 0.15) !important;
+    /* Focus state — high specificity to beat global stylesheet */
+    #address-form input.input-dark:focus,
+    #address-form input.input-dark:focus-visible,
+    .input-dark:focus,
+    .input-dark:focus-visible {
+      outline: none !important;
+      border: 2px solid #9f2089 !important;
+      box-shadow: 0 0 0 3px rgba(159, 32, 137, 0.18) !important;
+      background: #fff !important;
     }
   </style>
   <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
@@ -89,30 +182,41 @@
             Use My Location
           </button>
         </div>
-        <div class="field-wrap">
-          <input type="text" id="houseNo" class="input input-dark" placeholder="House no./ Building Name" autocomplete="address-line1"/>
+        <div class="floating-group">
+          <input type="text" id="houseNo" class="input input-dark" placeholder=" " autocomplete="address-line1"/>
+          <label class="floating-label">House no./ Building Name</label>
           <p class="field-error" id="err-houseNo" style="display:none"></p>
         </div>
-        <div class="field-wrap">
-          <input type="text" id="roadArea" class="input input-dark" placeholder="Road Name / Area / Colony" autocomplete="address-line2"/>
+        <div class="floating-group">
+          <input type="text" id="roadArea" class="input input-dark" placeholder=" " autocomplete="address-line2"/>
+          <label class="floating-label">Road Name / Area / Colony</label>
           <p class="field-error" id="err-roadArea" style="display:none"></p>
         </div>
-        <div class="field-wrap">
-          <input type="text" id="pincode" class="input input-dark" placeholder="Pincode" inputmode="numeric" maxlength="6" autocomplete="postal-code" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"/>
+        <div class="floating-group">
+          <input type="text" id="pincode" class="input input-dark" placeholder=" " inputmode="numeric" maxlength="6" autocomplete="postal-code" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"/>
+          <label class="floating-label">Pincode</label>
           <p class="field-error" id="err-pincode" style="display:none"></p>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div class="field-wrap">
-            <input type="text" id="city" class="input input-dark" placeholder="City" autocomplete="address-level2"/>
+          <div class="floating-group">
+            <input type="text" id="city" class="input input-dark" placeholder=" " autocomplete="address-level2"/>
+            <label class="floating-label">City</label>
             <p class="field-error" id="err-city" style="display:none"></p>
           </div>
-          <div class="field-wrap">
-            <input type="text" id="state" class="input input-dark" placeholder="State" autocomplete="address-level1"/>
+          <div class="floating-group" style="position:relative">
+            <input type="text" id="state-input" class="input input-dark" placeholder=" " autocomplete="off" onfocus="openStateDropdown()" oninput="filterStates()" onblur="setTimeout(closeStateDropdown, 200)"/>
+            <label class="floating-label">State</label>
+            <input type="hidden" id="state" required />
+            <svg class="custom-select-icon" viewBox="0 0 24 24" width="16" height="16" stroke="#64748b" stroke-width="2" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            <div class="custom-select-dropdown" id="state-dropdown">
+              <!-- filled by JS -->
+            </div>
             <p class="field-error" id="err-state" style="display:none"></p>
           </div>
         </div>
-        <div class="field-wrap">
-          <input type="text" id="landmark" class="input input-dark" placeholder="Nearby Famous Place/Shop/School (Optional)" autocomplete="off"/>
+        <div class="floating-group">
+          <input type="text" id="landmark" class="input input-dark" placeholder=" " autocomplete="off"/>
+          <label class="floating-label">Nearby Famous Place/Shop/School (Optional)</label>
         </div>
       </div>
 
@@ -125,12 +229,14 @@
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div class="field-wrap">
-            <input type="text" id="name" class="input input-dark" placeholder="Full Name" autocomplete="name"/>
+          <div class="floating-group">
+            <input type="text" id="name" class="input input-dark" placeholder=" " autocomplete="name"/>
+            <label class="floating-label">Full Name</label>
             <p class="field-error" id="err-name" style="display:none"></p>
           </div>
-          <div class="field-wrap">
-            <input type="tel" id="contactNumber" class="input input-dark" placeholder="10-digit Mobile" inputmode="numeric" maxlength="10" autocomplete="tel" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"/>
+          <div class="floating-group">
+            <input type="tel" id="contactNumber" class="input input-dark" placeholder=" " inputmode="numeric" maxlength="10" autocomplete="tel" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"/>
+            <label class="floating-label">10-digit Mobile Number</label>
             <p class="field-error" id="err-contactNumber" style="display:none"></p>
           </div>
         </div>
@@ -149,6 +255,60 @@
 
   <script src="app.js"></script>
   <script>
+    // Custom State Dropdown Logic
+    const statesList = [
+      "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+      "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+      "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+      "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", 
+      "West Bengal", "Andaman and Nicobar", "Chandigarh", "Dadra & Nagar Haveli", "Delhi", 
+      "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+    ];
+
+    function renderStates(list) {
+      const drop = document.getElementById('state-dropdown');
+      if (list.length === 0) {
+        drop.innerHTML = '<div class="custom-option" style="color:#94a3b8;cursor:default">No states found</div>';
+        return;
+      }
+      // Use mousedown and touchstart to fire BEFORE the input's blur event hides the dropdown
+      drop.innerHTML = list.map(st => `<div class="custom-option" onmousedown="event.preventDefault(); selectState('${st}')" ontouchstart="event.preventDefault(); selectState('${st}')">${st}</div>`).join('');
+    }
+
+    function openStateDropdown() {
+      const input = document.getElementById('state-input');
+      // If a valid state was already selected, clear the search text so user can see all options easily
+      if(document.getElementById('state').value) {
+        input.value = '';
+      }
+      renderStates(statesList);
+      document.getElementById('state-dropdown').classList.add('show');
+    }
+
+    function closeStateDropdown() {
+      document.getElementById('state-dropdown').classList.remove('show');
+      // Reset input text to selected value if user didn't pick anything
+      const selected = document.getElementById('state').value;
+      if (selected) {
+        document.getElementById('state-input').value = selected;
+      } else {
+        document.getElementById('state-input').value = '';
+      }
+    }
+
+    function filterStates() {
+      const q = document.getElementById('state-input').value.toLowerCase();
+      const filtered = statesList.filter(s => s.toLowerCase().includes(q));
+      renderStates(filtered);
+      document.getElementById('state-dropdown').classList.add('show');
+    }
+
+    function selectState(val) {
+      document.getElementById('state').value = val;
+      document.getElementById('state-input').value = val;
+      document.getElementById('state-dropdown').classList.remove('show');
+    }
+
     // Redirect if cart empty
     document.addEventListener('DOMContentLoaded', function() {
       const items = window.Cart.getItems();
@@ -157,7 +317,13 @@
       const saved = window.DeliveryAddress.load();
       if (saved) {
         const fields = ['houseNo','roadArea','pincode','city','state','landmark','name','contactNumber'];
-        fields.forEach(f => { const el = document.getElementById(f); if(el && saved[f]) el.value = saved[f]; });
+        fields.forEach(f => { 
+          const el = document.getElementById(f); 
+          if(el && saved[f]) {
+            el.value = saved[f]; 
+            if(f === 'state') document.getElementById('state-input').value = saved[f];
+          }
+        });
       }
     });
 
