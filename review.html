@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Review Order — meesho</title>
+  <meta name="description" content="Review your order before payment."/>
+  <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
+</head>
+<body class="pb-32" style="background:#f4f4f4">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header-inner" style="max-width:32rem">
+      <a href="address.html" aria-label="Go back" style="color:var(--foreground)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <h1 style="font-size:.875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Review</h1>
+      <div style="width:1.5rem"></div>
+    </div>
+    <div class="checkout-progress">
+      <div class="checkout-progress-step"><div class="checkout-progress-dot done">✓</div><div class="checkout-progress-label">Address</div></div>
+      <div class="checkout-progress-line done"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot active">2</div><div class="checkout-progress-label active">Review</div></div>
+      <div class="checkout-progress-line"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot">3</div><div class="checkout-progress-label">Payment</div></div>
+      <div class="checkout-progress-line"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot">4</div><div class="checkout-progress-label">Summary</div></div>
+    </div>
+  </header>
+
+  <main style="max-width:32rem;margin:0 auto;padding:.75rem;display:flex;flex-direction:column;gap:.75rem" id="review-main">
+    <div class="flex items-center justify-center" style="padding:3rem">
+      <div class="meesho-loader"><div class="meesho-loader-dot"></div><div class="meesho-loader-dot"></div><div class="meesho-loader-dot"></div></div>
+    </div>
+  </main>
+
+  <!-- Sticky Footer -->
+  <div class="sticky-footer-bar">
+    <div class="sticky-footer-bar-inner">
+      <div style="flex:1;min-width:0">
+        <p style="font-size:1.25rem;font-weight:700;line-height:1">₹<span id="footer-total">0</span></p>
+        <button onclick="document.getElementById('review-price-details').scrollIntoView({behavior:'smooth'})" style="font-size:.6875rem;font-weight:700;color:var(--primary);margin-top:.375rem;cursor:pointer;text-transform:uppercase;letter-spacing:.05em">View Price Details</button>
+      </div>
+      <a href="checkout.html" class="btn btn-primary btn-lg" style="min-width:9.25rem">Continue</a>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const items = window.Cart.getItems();
+      if (items.length === 0) { window.location.href = 'index.html'; return; }
+      const address = window.DeliveryAddress.load();
+      if (!address) { window.location.href = 'address.html'; return; }
+      renderReview(items, address);
+    });
+
+    function renderReview(items, address) {
+      const { totalPrice } = window.Cart.getTotals();
+      const deliveryDate = window.DeliveryAddress.estimatedDelivery();
+      document.getElementById('footer-total').textContent = totalPrice;
+
+      const main = document.getElementById('review-main');
+      main.innerHTML = `
+        <!-- Review product cards -->
+        ${items.map(item => {
+          const seller = item.seller || 'StyleCraft T-Shirts';
+          const lineTotal = item.price * item.quantity;
+          return `<article class="review-card slide-in">
+            <div class="review-card-body">
+              <div style="flex-shrink:0;width:4.5rem;height:4.5rem;background:var(--muted);border-radius:.5rem;overflow:hidden">
+                <img src="${item.image}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"/>
+              </div>
+              <div style="flex:1;min-width:0">
+                <p style="font-size:.875rem;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:1rem">${item.title}</p>
+                <div style="display:flex;align-items:baseline;gap:.5rem;margin-top:.25rem">
+                  <span style="font-size:1rem;font-weight:700">₹${lineTotal}</span>
+                  <span style="font-size:.75rem;color:var(--muted-foreground);text-decoration:line-through">₹${item.mrp * item.quantity}</span>
+                </div>
+                <p style="font-size:.75rem;color:var(--muted-foreground);margin-top:.15rem">Size: ${item.size} • Qty: ${item.quantity}</p>
+                <button onclick="Cart.removeItem(${item.id},'${item.size}');window.location.reload()" style="display:flex;align-items:center;gap:.2rem;margin-top:.375rem;font-size:.75rem;color:var(--destructive);font-weight:500;cursor:pointer">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove
+                </button>
+              </div>
+              <a href="product.html?id=${item.id}" style="color:var(--muted-foreground);flex-shrink:0;align-self:flex-start">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            </div>
+            <div class="review-card-footer">
+              <span>Sold by: <b>${seller}</b></span>
+              <span style="color:var(--green);font-weight:600">Free Delivery</span>
+            </div>
+          </article>`;
+        }).join('')}
+
+        <!-- Delivery Address -->
+        <section class="section-card slide-in" style="padding:1rem">
+          <div style="display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.5rem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="oklch(0.55 0.15 250)" stroke-width="2" style="flex-shrink:0;margin-top:.1rem"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <p style="font-size:.875rem;font-weight:700">Delivery by ${deliveryDate}</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem">
+            <div style="min-width:0">
+              <p style="font-size:.875rem;font-weight:700">${address.name} • ${address.contactNumber}</p>
+              <p style="font-size:.75rem;color:var(--muted-foreground);margin-top:.25rem;line-height:1.5">${window.DeliveryAddress.format(address)}</p>
+            </div>
+            <a href="address.html" style="font-size:.875rem;font-weight:600;color:var(--primary);flex-shrink:0">Change</a>
+          </div>
+        </section>
+
+        <!-- Price Details -->
+        <section class="section-card slide-in" id="review-price-details" style="padding:1rem">
+          <h2 style="font-size:.875rem;font-weight:700;margin-bottom:.75rem">Price Details</h2>
+          <div class="price-row"><span>Total Product Price</span><span style="font-weight:500">₹${totalPrice}</span></div>
+          <div class="price-row"><span>Delivery Fee</span><span style="color:var(--green);font-weight:600">FREE</span></div>
+          <div class="price-total-row"><span>Order Total</span><span>₹${totalPrice}</span></div>
+        </section>
+      `;
+    }
+  </script>
+</body>
+</html>

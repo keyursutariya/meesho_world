@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Delivery Address — meesho</title>
+  <meta name="description" content="Add your delivery address to continue checkout."/>
+  <style>
+    body { background: #f4f6f8; }
+    .form-section {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 18px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .form-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .form-section-title { display: flex; align-items: center; gap: .5rem; font-size: .9375rem; font-weight: 700; color: #0f172a; }
+    .field-wrap { margin-bottom: .875rem; }
+    .input-dark {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      height: 2.875rem !important;
+      font-size: 0.875rem !important;
+      font-weight: 500 !important;
+      padding: 0 0.875rem !important;
+      box-shadow: none !important;
+    }
+    .input-dark::placeholder {
+      color: #94a3b8 !important;
+    }
+    .input-dark:focus {
+      border-color: #9f2089 !important;
+      box-shadow: 0 0 0 3px rgba(159, 32, 137, 0.15) !important;
+    }
+  </style>
+  <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
+</head>
+<body class="pb-24">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header-inner" style="max-width:32rem">
+      <a href="cart.html" aria-label="Go back" style="color:var(--foreground)">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <h1 style="font-size:.875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Add Delivery Address</h1>
+      <div style="width:1.5rem"></div>
+    </div>
+    <!-- Checkout Progress -->
+    <div class="checkout-progress">
+      <div class="checkout-progress-step">
+        <div class="checkout-progress-dot active">1</div>
+        <div class="checkout-progress-label active">Address</div>
+      </div>
+      <div class="checkout-progress-line"></div>
+      <div class="checkout-progress-step">
+        <div class="checkout-progress-dot">2</div>
+        <div class="checkout-progress-label">Review</div>
+      </div>
+      <div class="checkout-progress-line"></div>
+      <div class="checkout-progress-step">
+        <div class="checkout-progress-dot">3</div>
+        <div class="checkout-progress-label">Payment</div>
+      </div>
+      <div class="checkout-progress-line"></div>
+      <div class="checkout-progress-step">
+        <div class="checkout-progress-dot">4</div>
+        <div class="checkout-progress-label">Summary</div>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:32rem;margin:0 auto">
+    <form id="address-form" onsubmit="handleSubmit(event)" style="padding:1rem;display:flex;flex-direction:column;gap:0">
+
+      <!-- Address Section -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="oklch(0.55 0.15 250)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Delivery Address
+          </div>
+          <button type="button" onclick="useMyLocation()" style="display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border-radius:var(--radius);border:1px solid var(--primary);color:var(--primary);font-size:.75rem;font-weight:600;cursor:pointer">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+            Use My Location
+          </button>
+        </div>
+        <div class="field-wrap">
+          <input type="text" id="houseNo" class="input input-dark" placeholder="House no./ Building Name" autocomplete="address-line1"/>
+          <p class="field-error" id="err-houseNo" style="display:none"></p>
+        </div>
+        <div class="field-wrap">
+          <input type="text" id="roadArea" class="input input-dark" placeholder="Road Name / Area / Colony" autocomplete="address-line2"/>
+          <p class="field-error" id="err-roadArea" style="display:none"></p>
+        </div>
+        <div class="field-wrap">
+          <input type="text" id="pincode" class="input input-dark" placeholder="Pincode" inputmode="numeric" maxlength="6" autocomplete="postal-code" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"/>
+          <p class="field-error" id="err-pincode" style="display:none"></p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="field-wrap">
+            <input type="text" id="city" class="input input-dark" placeholder="City" autocomplete="address-level2"/>
+            <p class="field-error" id="err-city" style="display:none"></p>
+          </div>
+          <div class="field-wrap">
+            <input type="text" id="state" class="input input-dark" placeholder="State" autocomplete="address-level1"/>
+            <p class="field-error" id="err-state" style="display:none"></p>
+          </div>
+        </div>
+        <div class="field-wrap">
+          <input type="text" id="landmark" class="input input-dark" placeholder="Nearby Famous Place/Shop/School (Optional)" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- Contact Section -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="oklch(0.55 0.15 250)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.92a16 16 0 0 0 6.29 6.29l.61-.61a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+            Contact Details
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="field-wrap">
+            <input type="text" id="name" class="input input-dark" placeholder="Full Name" autocomplete="name"/>
+            <p class="field-error" id="err-name" style="display:none"></p>
+          </div>
+          <div class="field-wrap">
+            <input type="tel" id="contactNumber" class="input input-dark" placeholder="10-digit Mobile" inputmode="numeric" maxlength="10" autocomplete="tel" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"/>
+            <p class="field-error" id="err-contactNumber" style="display:none"></p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- Sticky Submit Button -->
+  <footer class="sticky-footer-bar" style="padding:.75rem 1rem">
+    <div style="max-width:32rem;margin:0 auto;width:100%">
+      <button type="submit" form="address-form" class="btn btn-primary btn-lg w-full">
+        Save Address and Continue
+      </button>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Redirect if cart empty
+    document.addEventListener('DOMContentLoaded', function() {
+      const items = window.Cart.getItems();
+      if (items.length === 0) { window.location.href = 'index.html'; return; }
+      // Pre-fill saved address
+      const saved = window.DeliveryAddress.load();
+      if (saved) {
+        const fields = ['houseNo','roadArea','pincode','city','state','landmark','name','contactNumber'];
+        fields.forEach(f => { const el = document.getElementById(f); if(el && saved[f]) el.value = saved[f]; });
+      }
+    });
+
+    function showError(fieldId, msg) {
+      const el = document.getElementById('err-' + fieldId);
+      if (!el) return;
+      el.textContent = msg; el.style.display = msg ? '' : 'none';
+    }
+
+    function validate(data) {
+      const errors = {};
+      if (!data.houseNo.trim())           errors.houseNo = 'Enter house / building name';
+      if (data.roadArea.trim().length < 2) errors.roadArea = 'Enter road / area';
+      if (!/^\d{6}$/.test(data.pincode.trim())) errors.pincode = 'Enter valid 6-digit pincode';
+      if (data.city.trim().length < 2)    errors.city = 'Enter city';
+      if (data.state.trim().length < 2)   errors.state = 'Enter state';
+      if (data.name.trim().length < 2)    errors.name = 'Enter your name';
+      if (!/^[6-9]\d{9}$/.test(data.contactNumber.trim())) errors.contactNumber = 'Enter valid 10-digit number';
+      return errors;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      // Clear old errors
+      ['houseNo','roadArea','pincode','city','state','name','contactNumber'].forEach(f => showError(f,''));
+
+      const data = {
+        houseNo: document.getElementById('houseNo').value,
+        roadArea: document.getElementById('roadArea').value,
+        pincode: document.getElementById('pincode').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        landmark: document.getElementById('landmark').value || '',
+        name: document.getElementById('name').value,
+        contactNumber: document.getElementById('contactNumber').value,
+      };
+
+      const errors = validate(data);
+      if (Object.keys(errors).length > 0) {
+        Object.entries(errors).forEach(([f,m]) => showError(f, m));
+        // Scroll to first error
+        const firstErr = Object.keys(errors)[0];
+        document.getElementById(firstErr)?.scrollIntoView({ behavior:'smooth', block:'center' });
+        return;
+      }
+
+      window.DeliveryAddress.save(data);
+      window.location.href = 'review.html';
+    }
+
+    function useMyLocation() {
+      if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => { alert(`Location detected!\nLat: ${pos.coords.latitude.toFixed(4)}\nLng: ${pos.coords.longitude.toFixed(4)}\n\nPlease enter your pincode manually.`); document.getElementById('pincode').focus(); },
+        () => { alert('Unable to detect location. Please enter your address manually.'); }
+      );
+    }
+  </script>
+</body>
+</html>

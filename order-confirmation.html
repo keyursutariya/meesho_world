@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — meesho</title>
+  <meta name="description" content="Your order has been placed successfully on meesho."/>
+  <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
+</head>
+<body style="background:#f4f4f4;padding-bottom:2rem">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header-inner" style="max-width:32rem">
+      <div style="width:1.5rem"></div>
+      <h1 style="font-size:.875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Summary</h1>
+      <div style="width:1.5rem"></div>
+    </div>
+    <div class="checkout-progress">
+      <div class="checkout-progress-step"><div class="checkout-progress-dot done">✓</div><div class="checkout-progress-label">Address</div></div>
+      <div class="checkout-progress-line done"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot done">✓</div><div class="checkout-progress-label">Review</div></div>
+      <div class="checkout-progress-line done"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot done">✓</div><div class="checkout-progress-label">Payment</div></div>
+      <div class="checkout-progress-line done"></div>
+      <div class="checkout-progress-step"><div class="checkout-progress-dot active">4</div><div class="checkout-progress-label active">Summary</div></div>
+    </div>
+  </header>
+
+  <!-- No Order State -->
+  <div id="no-order" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem">
+    <h2 style="font-size:1.125rem;font-weight:600">No recent order found</h2>
+    <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem">Continue Shopping</a>
+  </div>
+
+  <!-- Order Content -->
+  <div id="order-content" style="display:none;max-width:56rem;margin:0 auto">
+
+    <!-- Success Header -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:.75rem;margin:.75rem;padding:2rem;text-align:center">
+      <div class="confirm-success-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#16a34a" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h1 id="confirm-title" style="font-size:1.25rem;font-weight:700">Order Placed Successfully!</h1>
+      <p id="confirm-subtitle" style="font-size:.875rem;color:var(--muted-foreground);margin-top:.25rem"></p>
+      <div id="pending-notice" style="display:none;font-size:.75rem;color:#92400e;background:#fffbeb;border:1px solid #fcd34d;border-radius:.5rem;padding:.625rem .75rem;margin-top:.75rem;max-width:24rem;margin-left:auto;margin-right:auto;text-align:left">
+        Payment confirmation is manual for UPI P2P. Your order will ship after payment is verified on our side.
+      </div>
+      <div style="margin-top:1rem;display:inline-flex;align-items:center;gap:.5rem;padding:.375rem .875rem;border-radius:9999px;background:var(--muted)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <span style="font-size:.75rem;font-family:monospace;font-weight:600" id="order-id-badge">Order ID: ...</span>
+      </div>
+    </div>
+
+    <!-- Delivery estimate -->
+    <div class="order-section flex items-center gap-3">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--primary)" stroke-width="2" style="flex-shrink:0"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <div>
+        <p style="font-size:.875rem;font-weight:600" id="delivery-est">Arriving soon</p>
+        <p style="font-size:.75rem;color:var(--muted-foreground)">We'll notify you once your order is shipped.</p>
+      </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="order-section">
+      <h2 style="font-size:.875rem;font-weight:600;margin-bottom:.75rem" id="items-heading">Order Items</h2>
+      <ul style="display:flex;flex-direction:column;gap:.75rem" id="order-items-list"></ul>
+    </div>
+
+    <!-- Shipping Address -->
+    <div class="order-section">
+      <div class="flex items-center gap-2" style="margin-bottom:.5rem">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <h2 style="font-size:.875rem;font-weight:600">Shipping Address</h2>
+        <span id="address-type-badge" style="margin-left:auto;font-size:.625rem;font-weight:700;text-transform:uppercase;padding:.15rem .5rem;border-radius:4px;background:var(--accent);color:var(--accent-foreground)">Home</span>
+      </div>
+      <p style="font-size:.875rem;font-weight:500" id="ship-name"></p>
+      <p style="font-size:.75rem;color:var(--muted-foreground);margin-top:.25rem;line-height:1.5" id="ship-address"></p>
+      <p style="font-size:.75rem;color:var(--muted-foreground);margin-top:.5rem" id="ship-phone"></p>
+    </div>
+
+    <!-- Payment + Total -->
+    <div class="order-section">
+      <div class="flex items-center gap-2" style="margin-bottom:.75rem">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <h2 style="font-size:.875rem;font-weight:600">Payment</h2>
+      </div>
+      <div class="price-row"><span style="color:var(--muted-foreground)">Method</span><span style="font-weight:500" id="pay-method"></span></div>
+      <div class="price-total-row"><span id="pay-amount-label">Amount Paid</span><span id="pay-amount"></span></div>
+      <p id="pay-pending-note" style="display:none;font-size:.75rem;color:var(--muted-foreground);margin-top:.5rem">Payment status: awaiting confirmation</p>
+    </div>
+
+    <!-- CTA Buttons -->
+    <div class="grid grid-cols-2 gap-2" style="padding:.75rem">
+      <a href="index.html" class="btn btn-outline" style="height:3rem;gap:.375rem">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Go Home
+      </a>
+      <a href="index.html" class="btn btn-primary" style="height:3rem;gap:.375rem">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Continue Shopping
+      </a>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const order = window.Order.load();
+      if (!order) { document.getElementById('no-order').style.display = 'flex'; return; }
+      document.getElementById('order-content').style.display = '';
+      renderOrder(order);
+    });
+
+    function getPaymentLabel(order) {
+      if (order.paymentLabel) return order.paymentLabel;
+      if (order.payment && order.payment.startsWith('upi-')) return 'Pay Online (UPI)';
+      return order.payment || 'Unknown';
+    }
+
+    function renderOrder(order) {
+      const deliveryDate = (() => {
+        const d = new Date(order.placedAt); d.setDate(d.getDate()+5);
+        return d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+      })();
+      const paymentPending  = order.paymentStatus === 'pending_verification';
+      const userConfirmedOnly = order.paymentStatus === 'user_confirmed';
+      const firstName = (order.shipping?.fullName || '').split(' ')[0];
+
+      // Header
+      document.getElementById('confirm-title').textContent   = userConfirmedOnly ? 'Order Received!' : 'Order Placed Successfully!';
+      document.getElementById('confirm-subtitle').textContent = userConfirmedOnly ? `Thank you, ${firstName}. We are verifying your UPI payment.` : `Thank you, ${firstName}. Your order is confirmed.`;
+      if (userConfirmedOnly) document.getElementById('pending-notice').style.display = '';
+      document.getElementById('order-id-badge').textContent  = `Order ID: ${order.orderId}`;
+
+      // Delivery
+      document.getElementById('delivery-est').textContent = `Arriving by ${deliveryDate}`;
+
+      // Items
+      document.getElementById('items-heading').textContent = `Order Items (${order.items.length})`;
+      document.getElementById('order-items-list').innerHTML = order.items.map(it => `
+        <li style="display:flex;gap:.75rem">
+          <div style="width:4rem;height:4rem;background:var(--muted);border-radius:.375rem;flex-shrink:0;overflow:hidden">
+            <img src="${it.image}" alt="${it.title}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"/>
+          </div>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:.75rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${it.title}</p>
+            <p style="font-size:.6875rem;color:var(--muted-foreground);margin-top:.15rem">Size: ${it.size} · Qty: ${it.quantity}</p>
+            <p style="font-size:.875rem;font-weight:600;margin-top:.25rem">₹${it.price * it.quantity}</p>
+          </div>
+        </li>`).join('');
+
+      // Shipping
+      const s = order.shipping;
+      document.getElementById('ship-name').textContent    = s.fullName;
+      document.getElementById('ship-address').innerHTML   = `${s.address}${s.landmark ? ', '+s.landmark : ''}<br>${s.city}, ${s.state} - ${s.pincode}`;
+      document.getElementById('ship-phone').textContent   = `Phone: +91 ${s.phone}`;
+      document.getElementById('address-type-badge').textContent = s.addressType;
+
+      // Payment
+      document.getElementById('pay-method').textContent = getPaymentLabel(order);
+      document.getElementById('pay-amount-label').textContent = userConfirmedOnly ? 'Amount (pending verify)' : 'Amount Paid';
+      document.getElementById('pay-amount').textContent = `₹${order.total}`;
+      if (paymentPending) document.getElementById('pay-pending-note').style.display = '';
+    }
+  </script>
+</body>
+</html>
