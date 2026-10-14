@@ -2044,6 +2044,7 @@ svg {
 .carousel {
   position: relative;
   width: 100%;
+  min-height: 180px;
   overflow: hidden !important;
   touch-action: pan-y;
   background: #ffffff;

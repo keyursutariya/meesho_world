@@ -6,6 +6,23 @@
   <title>Order Confirmed — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
   <meta name="description" content="Your order has been placed successfully on meesho."/>
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+
+  fbq('init', '2137372483528712');
+  fbq('track', 'PageView');
+  try {
+    const o = JSON.parse(localStorage.getItem('meesho_last_order') || '{}');
+    fbq('track', 'Purchase', { value: o.total || 299, currency: 'INR' });
+  } catch(e) {}
+  </script>
   <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
 </head>
 <body style="background:#f4f4f4;padding-bottom:2rem">

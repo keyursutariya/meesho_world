@@ -15,7 +15,23 @@ window.Cart = (() => {
   let listeners = [];
 
   function load() {
-    try { items = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { items = []; }
+    try {
+      items = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+      if (window.PRODUCTS && Array.isArray(items)) {
+        let changed = false;
+        items.forEach(item => {
+          const p = window.PRODUCTS.find(x => x.id === item.id);
+          if (p && (item.price !== p.price || item.mrp !== p.mrp)) {
+            item.price = p.price;
+            item.mrp = p.mrp;
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem(CART_KEY, JSON.stringify(items));
+        }
+      }
+    } catch { items = []; }
   }
   function save() {
     localStorage.setItem(CART_KEY, JSON.stringify(items));

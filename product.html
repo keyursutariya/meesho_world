@@ -3,6 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+
+    fbq('init', '2137372483528712');
+    fbq('track', 'PageView');
+    </script>
     <title>Product — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
     <meta
@@ -1063,6 +1076,11 @@
         }
 
         if (!id) {
+          const pathMatch = window.location.pathname.match(/\/product\/([^\/?#]+)/);
+          if (pathMatch && pathMatch[1]) id = pathMatch[1];
+        }
+
+        if (!id) {
           try {
             id = sessionStorage.getItem("selected_product_id");
           } catch (e) {}
@@ -1090,7 +1108,7 @@
           );
         }
 
-        if (!currentProduct && !rawId) {
+        if (!currentProduct) {
           currentProduct = allProducts[0];
         }
 
@@ -1099,6 +1117,28 @@
             '<div class="empty-state"><h2>Product not found</h2><a href="index.html" class="btn btn-primary" style="margin-top:1rem">Go Home</a></div>';
           return;
         }
+
+        try {
+          sessionStorage.setItem("selected_product_id", String(currentProduct.id));
+          if (window.history && window.history.replaceState) {
+            const canonicalUrl = `product.html?id=${currentProduct.id}`;
+            if (!window.location.search.includes(`id=${currentProduct.id}`)) {
+              window.history.replaceState(null, '', canonicalUrl);
+            }
+          }
+        } catch (e) {}
+
+        try {
+          if (window.fbq) {
+            fbq('track', 'ViewContent', {
+              content_name: currentProduct.title,
+              content_ids: [String(currentProduct.id)],
+              content_type: 'product',
+              value: currentProduct.price,
+              currency: 'INR'
+            });
+          }
+        } catch(e) {}
 
         const p = currentProduct;
         const sizes = window.ProductHelpers.getSizes(p.title);
@@ -1158,7 +1198,7 @@
                 </div>
 
                 <!-- Special Offer Tag -->
-                ${p.offers > 0 ? `<div class="offer-pill-badge">₹139 with 1 Special Offer ➔</div>` : ""}
+                ${p.offers > 0 ? `<div class="offer-pill-badge">${p.specialOffer || `₹${p.price - 10} with 1 Special Offer`} ➔</div>` : ""}
 
                 <!-- Rating & Trusted Row -->
                 <div class="rating-trusted-row">
@@ -1418,8 +1458,25 @@
         };
       }
 
-      window.addEventListener("load", initProduct);
-      if (document.readyState === "complete") initProduct();
+      // Immediate, resilient initialization for mobile & Instagram/Meta In-App Browsers
+      let productInitialized = false;
+      function startProductInit() {
+        if (productInitialized) return;
+        if (!window.PRODUCTS || window.PRODUCTS.length === 0) {
+          setTimeout(startProductInit, 30);
+          return;
+        }
+        productInitialized = true;
+        initProduct();
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startProductInit);
+      } else {
+        startProductInit();
+      }
+      window.addEventListener("load", startProductInit);
+      setTimeout(startProductInit, 20);
     </script>
   </body>
 </html>
