@@ -122,10 +122,14 @@
 
           <!-- QR Code -->
           <div id="qr-section" style="display:none;padding:1rem;border:1.5px solid #cbd5e1;border-radius:12px;margin-top:.75rem;background:#ffffff;text-align:center">
-            <p style="font-size:.875rem;font-weight:700;color:#0f172a;margin-bottom:.75rem">Scan QR Code to Pay</p>
+            <p style="font-size:.9375rem;font-weight:700;color:#0f172a;margin-bottom:.25rem">Scan QR Code to Pay</p>
+            <p style="font-size:.75rem;color:var(--muted-foreground);margin-bottom:.75rem">Pay using any UPI App (Google Pay, PhonePe, Paytm, etc.)</p>
             <div id="qr-canvas-wrap" style="display:flex;justify-content:center;align-items:center;min-height:190px"></div>
             <p style="font-size:.75rem;color:#475569;margin-top:.75rem">UPI ID: <b id="qr-vpa" style="color:#0f172a"></b></p>
-            <button onclick="copyUpi()" class="btn btn-outline btn-sm w-full" style="margin-top:.625rem;border-radius:8px;font-weight:600">📋 Copy UPI ID</button>
+            <div class="flex gap-2" style="margin-top:.625rem">
+              <button onclick="copyUpi()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📋 Copy UPI ID</button>
+              <button onclick="downloadQr()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📥 Save QR</button>
+            </div>
           </div>
         </div>
       </div>
@@ -258,11 +262,10 @@
       }
     }
 
-
-
     function renderQr() {
       const wrap = document.getElementById('qr-canvas-wrap');
-      const upiLink = window.UpiPayment.buildUpiLink(pricing.orderTotal || 299);
+      const orderTotal = pricing.orderTotal != null ? pricing.orderTotal : 1;
+      const upiLink = window.UpiPayment.buildUpiLink(orderTotal);
       const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiLink)}&margin=10`;
       
       wrap.innerHTML = `
@@ -270,6 +273,19 @@
           <img src="${qrApiUrl}" alt="Scan QR Code to Pay" width="180" height="180" style="display:block;border-radius:6px;width:180px;height:180px;object-fit:contain" onerror="renderQrCanvasFallback(this, '${upiLink}')"/>
         </div>
       `;
+    }
+
+    function downloadQr() {
+      const orderTotal = pricing.orderTotal != null ? pricing.orderTotal : 1;
+      const upiLink = window.UpiPayment.buildUpiLink(orderTotal);
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}&margin=10`;
+      const a = document.createElement('a');
+      a.href = qrApiUrl;
+      a.download = `meesho-upi-qr.png`;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 500);
     }
 
     function renderQrCanvasFallback(imgEl, upiLink) {

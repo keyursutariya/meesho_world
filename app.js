@@ -115,6 +115,7 @@ window.PaymentConfig = {
   UPI_VPA: 'paytm.s3vx0km@pty',
   PAYEE_NAME: 'Paytm',
   TRANSACTION_NOTE: 'Verified Paytm Merchant',
+  MERCHANT_CODE: '5699',   // MCC 5699 = Family Clothing Stores (NPCI standard for apparel merchant)
   PAYMENT_APPS: [
     { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
@@ -157,11 +158,13 @@ window.UpiPayment = {
     return 'des';
   },
   buildUpiLink(amount, txnId) {
-    const tr = txnId || `TXN${Date.now()}${Math.floor(Math.random()*1000)}`;
+    const tr  = txnId || `TXN${Date.now()}${Math.floor(Math.random()*1000)}`;
     const vpa = window.PaymentConfig.UPI_VPA;
     const pn  = window.PaymentConfig.PAYEE_NAME;
     const tn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
-    return `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(pn)}&tn=${encodeURIComponent(tn)}&am=${Number(amount).toFixed(2)}&cu=INR&tr=${encodeURIComponent(tr)}`;
+    const mc  = window.PaymentConfig.MERCHANT_CODE || '5699';
+    // mc= (Merchant Category Code) is required by NPCI for merchant VPA (@pty) intent flows
+    return `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(pn)}&mc=${mc}&am=${Number(amount).toFixed(2)}&cu=INR&tn=${encodeURIComponent(tn)}&tr=${encodeURIComponent(tr)}`;
   },
   buildPhonePeNativeUrl(amount) {
     const orderId = crypto.randomUUID ? crypto.randomUUID() : `ord-${Date.now()}`;
@@ -187,12 +190,21 @@ window.UpiPayment = {
     setTimeout(() => document.body.removeChild(a), 500);
   },
   run(method, amount, device, phonePeNativeUrl, callbacks) {
-    const vpa = encodeURIComponent(window.PaymentConfig.UPI_VPA);
-    const pn  = encodeURIComponent(window.PaymentConfig.PAYEE_NAME);
-    const tn  = encodeURIComponent(window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant');
     const rawVpa = window.PaymentConfig.UPI_VPA;
     const rawPn  = window.PaymentConfig.PAYEE_NAME;
     const rawTn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    const mc     = window.PaymentConfig.MERCHANT_CODE || '5699';
+    const tr     = `TXN${Date.now()}${Math.floor(Math.random()*1000)}`;
+
+    // Properly encoded params
+    const pa  = encodeURIComponent(rawVpa);
+    const pn  = encodeURIComponent(rawPn);
+    const tn  = encodeURIComponent(rawTn);
+    const amt = Number(amount).toFixed(2);
+
+    // Standard NPCI-compliant UPI URL with mc= for merchant VPA
+    // mc= (Merchant Category Code) is REQUIRED for @pty merchant handles on GPay/PhonePe intent flows
+    const upiUrl = `upi://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`;
 
     // UPI apps that need deep link handling
     const upiApps = ['gpay','phonepe','paytm','bharatpe','amazonpay','cred','ippb','supermoney','bhim'];
@@ -200,37 +212,42 @@ window.UpiPayment = {
     if (upiApps.includes(method)) {
       if (device === 'and') {
         if (method === 'phonepe') {
+          // PhonePe native intent still works well with package lock
           const params = phonePeNativeUrl.replace('phonepe://','');
           this.navLink(`intent://${params}#Intent;scheme=phonepe;package=com.phonepe.app;end`);
         } else if (method === 'gpay') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
+          // For @pty merchant VPA: use plain upi:// redirect, NOT intent:// package lock
+          // intent:// with package lock blocks merchant VPAs from browser context on newer GPay versions
+          window.location.href = upiUrl;
+          return;
         } else if (method === 'paytm') {
-          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
+          this.navLink(`paytmmp://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`);
         } else if (method === 'bharatpe') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.bharatpe.app;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=com.bharatpe.app;end`);
         } else if (method === 'amazonpay') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`);
         } else if (method === 'cred') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dreamplug.androidapp;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=com.dreamplug.androidapp;end`);
         } else if (method === 'ippb') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dop.ippbretail;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=com.dop.ippbretail;end`);
         } else if (method === 'supermoney') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=com.supermoney.app;end`);
         } else if (method === 'bhim') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`);
+          this.navLink(`intent://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=in.org.npci.upiapp;end`);
         } else {
-          // fallback — generic UPI chooser
-          this.navLink(`upi://pay?pa=${rawVpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR`);
+          // fallback — generic UPI chooser via standard upi:// redirect
+          window.location.href = upiUrl;
+          return;
         }
       } else if (device === 'ios') {
         if (method === 'phonepe') {
-          this.navLink(`phonepe://upi//pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
+          this.navLink(`phonepe://upi//pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`);
         } else if (method === 'paytm') {
-          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
+          this.navLink(`paytmmp://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`);
         } else if (method === 'amazonpay') {
-          this.navLink(`amzn://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
+          this.navLink(`amzn://pay?pa=${pa}&pn=${pn}&mc=${mc}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`);
         } else {
-          this.navLink(`upi://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
+          this.navLink(upiUrl);
         }
       } else {
         // Desktop — show QR fallback for app-based methods
