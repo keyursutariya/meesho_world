@@ -123,12 +123,36 @@
           <!-- QR Code -->
           <div id="qr-section" style="display:none;padding:1rem;border:1.5px solid #cbd5e1;border-radius:12px;margin-top:.75rem;background:#ffffff;text-align:center">
             <p style="font-size:.9375rem;font-weight:700;color:#0f172a;margin-bottom:.25rem">Scan QR Code to Pay</p>
-            <p style="font-size:.75rem;color:var(--muted-foreground);margin-bottom:.75rem">Pay using any UPI App (Google Pay, PhonePe, Paytm, etc.)</p>
-            <div id="qr-canvas-wrap" style="display:flex;justify-content:center;align-items:center;min-height:190px"></div>
-            <p style="font-size:.75rem;color:#475569;margin-top:.75rem">UPI ID: <b id="qr-vpa" style="color:#0f172a"></b></p>
-            <div class="flex gap-2" style="margin-top:.625rem">
-              <button onclick="copyUpi()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📋 Copy UPI ID</button>
-              <button onclick="downloadQr()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📥 Save QR</button>
+            <p style="font-size:.75rem;color:var(--muted-foreground);margin-bottom:.75rem">Pay using any UPI App (Google Pay, PhonePe, Paytm, BHIM, etc.)</p>
+            <div id="qr-canvas-wrap" style="display:flex;justify-content:center;align-items:center;min-height:200px"></div>
+            
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.625rem;margin-top:.75rem;text-align:left;font-size:.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+                <span style="color:#64748b">Payee:</span>
+                <b id="qr-pn" style="color:#0f172a">Paytm</b>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+                <span style="color:#64748b">UPI ID:</span>
+                <b id="qr-vpa" style="color:#0f172a">paytm.s3vx0km@pty</b>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+                <span style="color:#64748b">Note:</span>
+                <b id="qr-tn" style="color:#0f172a">Verified Paytm Merchant</b>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="color:#64748b">Order Total:</span>
+                <b id="qr-amt" style="color:#16a34a">₹0</b>
+              </div>
+              <div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed #cbd5e1">
+                <span style="color:#64748b;font-size:.6875rem;display:block;margin-bottom:.2rem">Scanned QR Text:</span>
+                <code id="qr-raw-string" style="font-size:.6875rem;word-break:break-all;color:#334155;background:#fff;padding:.35rem .5rem;border-radius:4px;border:1px solid #cbd5e1;display:block;font-family:monospace"></code>
+              </div>
+            </div>
+
+            <div class="flex gap-2" style="margin-top:.75rem">
+              <button type="button" onclick="copyUpi()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📋 Copy VPA</button>
+              <button type="button" onclick="copyUpiString()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">🔗 Copy Link</button>
+              <button type="button" onclick="downloadQr()" class="btn btn-outline btn-sm flex-1" style="border-radius:8px;font-weight:600;font-size:.75rem">📥 Save QR</button>
             </div>
           </div>
         </div>
@@ -266,34 +290,68 @@
       const wrap = document.getElementById('qr-canvas-wrap');
       const orderTotal = pricing.orderTotal != null ? pricing.orderTotal : 1;
       const upiLink = window.UpiPayment.buildUpiLink(orderTotal);
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiLink)}&margin=10`;
       
+      const vpa = window.PaymentConfig.UPI_VPA;
+      const pn  = window.PaymentConfig.PAYEE_NAME || 'Paytm';
+      const tn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+      
+      if (document.getElementById('qr-vpa')) document.getElementById('qr-vpa').textContent = vpa;
+      if (document.getElementById('qr-pn')) document.getElementById('qr-pn').textContent = pn;
+      if (document.getElementById('qr-tn')) document.getElementById('qr-tn').textContent = tn;
+      if (document.getElementById('qr-amt')) document.getElementById('qr-amt').textContent = `₹${orderTotal}`;
+      if (document.getElementById('qr-raw-string')) document.getElementById('qr-raw-string').textContent = upiLink;
+
       wrap.innerHTML = `
-        <div style="background:#ffffff;padding:12px;border-radius:12px;border:1px solid #cbd5e1;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.06);margin:0 auto">
-          <img src="${qrApiUrl}" alt="Scan QR Code to Pay" width="180" height="180" style="display:block;border-radius:6px;width:180px;height:180px;object-fit:contain" onerror="renderQrCanvasFallback(this, '${upiLink}')"/>
+        <div style="background:#ffffff;padding:12px;border-radius:12px;border:1.5px solid #0f172a;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.08);margin:0 auto">
+          <div id="qr-target-box" style="display:flex;align-items:center;justify-content:center;width:190px;height:190px"></div>
         </div>
       `;
+
+      const targetBox = document.getElementById('qr-target-box');
+      if (window.QRCode) {
+        new window.QRCode(targetBox, {
+          text: upiLink,
+          width: 190,
+          height: 190,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: window.QRCode.CorrectLevel.M
+        });
+      } else {
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiLink)}&margin=10`;
+        targetBox.innerHTML = `<img src="${qrApiUrl}" alt="Scan QR Code to Pay" width="190" height="190" style="display:block;border-radius:6px;width:190px;height:190px;object-fit:contain"/>`;
+      }
     }
 
     function downloadQr() {
       const orderTotal = pricing.orderTotal != null ? pricing.orderTotal : 1;
       const upiLink = window.UpiPayment.buildUpiLink(orderTotal);
+      
+      const canvas = document.querySelector('#qr-target-box canvas');
+      if (canvas) {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `meesho-paytm-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 500);
+        return;
+      }
       const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}&margin=10`;
       const a = document.createElement('a');
       a.href = qrApiUrl;
-      a.download = `meesho-upi-qr.png`;
+      a.download = `meesho-paytm-qr.png`;
       a.target = '_blank';
       document.body.appendChild(a);
       a.click();
       setTimeout(() => document.body.removeChild(a), 500);
     }
 
-    function renderQrCanvasFallback(imgEl, upiLink) {
-      if (window.QRCode) {
-        const parent = imgEl.parentElement;
-        parent.innerHTML = '';
-        new window.QRCode(parent, { text: upiLink, width: 180, height: 180, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.M });
-      }
+    function copyUpiString() {
+      const orderTotal = pricing.orderTotal != null ? pricing.orderTotal : 1;
+      window.UpiPayment.copyUpiLink(orderTotal).then(() => {
+        alert('UPI Link copied to clipboard:\n' + window.UpiPayment.buildUpiLink(orderTotal));
+      });
     }
 
     function createPendingOrder() {
