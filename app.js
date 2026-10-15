@@ -217,9 +217,6 @@ window.UpiPayment = {
         case 'bhim':
           redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
           break;
-        case 'whatsapp':
-          redirect_url = `whatsapp://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
         case 'bharatpe':
           redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.bharatpe.app;end`;
           break;
@@ -232,9 +229,6 @@ window.UpiPayment = {
         case 'supermoney':
           redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`;
           break;
-        case 'qr':
-          callbacks.onQrOnly && callbacks.onQrOnly();
-          return;
         default:
           redirect_url = `upi://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
           break;
@@ -253,9 +247,6 @@ window.UpiPayment = {
         case 'amazonpay':
           redirect_url = `amzn://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
           break;
-        case 'qr':
-          callbacks.onQrOnly && callbacks.onQrOnly();
-          return;
         default:
           redirect_url = `upi://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
           break;
