@@ -193,90 +193,73 @@ window.UpiPayment = {
     return "phonepe://native?data=" + base64Data + "&id=p2ppayment";
   },
   run(method, amount, device, phonePeNativeUrl, callbacks) {
-    const upi_address = window.PaymentConfig.UPI_VPA;
-    const payee_name  = window.PaymentConfig.PAYEE_NAME || 'Paytm';
-    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
-    const amt         = parseFloat(amount).toFixed(2);
-    const encPn       = encodeURIComponent(payee_name);
-    const encTn       = encodeURIComponent(txn_note);
+    if (method === 'qr') {
+      callbacks.onQrOnly && callbacks.onQrOnly();
+      return;
+    }
 
-    let redirect_url = "";
-
-    if (device === 'and') {
-      switch (method) {
-        case 'gpay':
-          // Standard Android Google Pay intent with user's verified Paytm merchant details
-          redirect_url = `intent://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
-          break;
-        case 'phonepe':
-          redirect_url = phonePeNativeUrl || this.buildPhonePeNativeUrl(amount);
-          break;
-        case 'paytm':
-          redirect_url = `intent://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end`;
-          break;
-        case 'bhim':
-          redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`;
-          break;
-        case 'bharatpe':
-          redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.bharatpe.app;end`;
-          break;
-        case 'amazonpay':
-          redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`;
-          break;
-        case 'cred':
-          redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.dreamplug.androidapp;end`;
-          break;
-        case 'supermoney':
-          redirect_url = `intent://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`;
-          break;
-        default:
-          redirect_url = `upi://pay?pa=${encodeURIComponent(upi_address)}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-      }
-    } else if (device === 'ios') {
-      switch (method) {
-        case 'gpay':
-          redirect_url = `gpay://upi/pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-        case 'phonepe':
-          redirect_url = `phonepe://upi//pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-        case 'paytm':
-          redirect_url = `paytmmp://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-        case 'amazonpay':
-          redirect_url = `amzn://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-        default:
-          redirect_url = `upi://pay?pa=${upi_address}&pn=${encPn}&tn=${encTn}&am=${amt}&cu=INR`;
-          break;
-      }
-    } else {
+    if (device === 'des') {
       // Desktop — show QR fallback for app-based methods
       callbacks.onDesktopQrFallback && callbacks.onDesktopQrFallback();
       return;
     }
 
-    if (redirect_url) {
-      if (redirect_url.startsWith('intent://')) {
-        const a = document.createElement('a');
-        a.href = redirect_url;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
-      } else {
-        window.location.href = redirect_url;
-      }
-    }
+    // All mobile app methods (GPay, Paytm, AmazonPay, BHIM, BharatPe, Supermoney, PhonePe)
+    // route exclusively to PhonePe's verified native payment URL
+    const redirect_url = phonePeNativeUrl || this.buildPhonePeNativeUrl(amount);
+
+    let appOpened = false;
+    let installTimer = null;
 
     const onVisible = () => {
-      if (!document.hidden) {
-        document.removeEventListener('visibilitychange', onVisible);
-        callbacks.onReturnFromApp && callbacks.onReturnFromApp();
+      if (document.hidden) {
+        // App launched and browser was sent to background
+        appOpened = true;
+        if (installTimer) {
+          clearTimeout(installTimer);
+          installTimer = null;
+        }
+      } else {
+        // Returned back to browser from PhonePe
+        if (appOpened) {
+          document.removeEventListener('visibilitychange', onVisible);
+          window.removeEventListener('pagehide', onPageHide);
+          callbacks.onReturnFromApp && callbacks.onReturnFromApp();
+        }
       }
     };
+
+    const onPageHide = () => {
+      appOpened = true;
+      if (installTimer) {
+        clearTimeout(installTimer);
+        installTimer = null;
+      }
+    };
+
     document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pagehide', onPageHide);
+
+    // Trigger PhonePe URL
+    if (redirect_url.startsWith('intent://')) {
+      const a = document.createElement('a');
+      a.href = redirect_url;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
+    } else {
+      window.location.href = redirect_url;
+    }
+
+    // Fallback: If PhonePe does not open (browser does not minimize within 1800ms)
+    installTimer = setTimeout(() => {
+      if (!appOpened && !document.hidden) {
+        document.removeEventListener('visibilitychange', onVisible);
+        window.removeEventListener('pagehide', onPageHide);
+        callbacks.onAppNotInstalled && callbacks.onAppNotInstalled('phonepe');
+      }
+    }, 1800);
   },
   async copyUpiId() {
     try { await navigator.clipboard.writeText(window.PaymentConfig.UPI_VPA); return true; }
