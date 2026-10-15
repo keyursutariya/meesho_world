@@ -12,13 +12,13 @@ window.PRODUCTS = [
       "images/products/p1/WhatsApp Image 2026-08-03 at 4.07.56 PM (1).jpeg",
       "images/products/p1/WhatsApp Image 2026-08-03 at 4.07.56 PM.jpeg"
     ],
-    "price": 299,
+    "price": 1,
     "mrp": 1499,
-    "discountLabel": "80% off",
+    "discountLabel": "99% off",
     "rating": 4.1,
     "reviews": 400,
     "offers": 1,
-    "specialOffer": "₹289 with Special Offer",
+    "specialOffer": "₹1 with Special Offer",
     "trusted": true,
     "dealTimer": true
   },
@@ -30,13 +30,13 @@ window.PRODUCTS = [
     "images": [
       "images/products/2pcscombo/WhatsApp Image 2026-08-03 at 6.43.16 PM.jpeg"
     ],
-    "price": 499,
+    "price": 1,
     "mrp": 2499,
-    "discountLabel": "80% off",
+    "discountLabel": "99% off",
     "rating": 4.3,
     "reviews": 650,
     "offers": 2,
-    "specialOffer": "₹489 with Special Offer",
+    "specialOffer": "₹1 with Special Offer",
     "trusted": true,
     "dealTimer": false
   },

