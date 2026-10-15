@@ -6,6 +6,7 @@
   <title>Order Confirmed — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
   <meta name="description" content="Your order has been placed successfully on meesho."/>
+  <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -15,14 +16,26 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-
-  fbq('init', '2137372483528712');
+  fbq('init', '1511058947312930');
   fbq('track', 'PageView');
   try {
     const o = JSON.parse(localStorage.getItem('meesho_last_order') || '{}');
-    fbq('track', 'Purchase', { value: o.total || 299, currency: 'INR' });
+    const totalVal = o.total || (o.pricing ? o.pricing.orderTotal : 299);
+    const contentIds = (o.items && o.items.length) ? o.items.map(function(i){ return String(i.id); }) : ['10001'];
+    const numItems = (o.items && o.items.length) ? o.items.reduce(function(s, i){ return s + (i.quantity || 1); }, 0) : 1;
+    fbq('track', 'Purchase', {
+      value: totalVal,
+      currency: 'INR',
+      content_type: 'product',
+      content_ids: contentIds,
+      num_items: numItems
+    });
   } catch(e) {}
   </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1511058947312930&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
   <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
 </head>
 <body style="background:#f4f4f4;padding-bottom:2rem">

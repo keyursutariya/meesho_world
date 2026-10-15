@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -12,9 +13,26 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-
-    fbq('init', '2137372483528712');
+    fbq('init', '1511058947312930');
     fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1511058947312930&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+    <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        ['fbclid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(function(k) {
+          var v = params.get(k);
+          if (v) {
+            try { sessionStorage.setItem('meta_' + k, v); } catch(e) {}
+            try { localStorage.setItem('meta_' + k, v); } catch(e) {}
+          }
+        });
+      } catch(e) {}
+    })();
     </script>
     <title>Product — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
@@ -1068,10 +1086,10 @@
       function getSelectedProductId() {
         const search = window.location.search || "";
         const params = new URLSearchParams(search);
-        let id = params.get("id");
+        let id = params.get("id") || params.get("product_id") || params.get("pid") || params.get("p");
 
         if (!id) {
-          const match = window.location.href.match(/[?&]id=([^&#]+)/);
+          const match = window.location.href.match(/[?&](?:id|product_id|pid|p)=([^&#]+)/);
           if (match) id = match[1];
         }
 
@@ -1121,9 +1139,10 @@
         try {
           sessionStorage.setItem("selected_product_id", String(currentProduct.id));
           if (window.history && window.history.replaceState) {
-            const canonicalUrl = `product.html?id=${currentProduct.id}`;
-            if (!window.location.search.includes(`id=${currentProduct.id}`)) {
-              window.history.replaceState(null, '', canonicalUrl);
+            const currentParams = new URLSearchParams(window.location.search);
+            if (currentParams.get('id') !== String(currentProduct.id)) {
+              currentParams.set('id', String(currentProduct.id));
+              window.history.replaceState(null, '', 'product.html?' + currentParams.toString());
             }
           }
         } catch (e) {}
@@ -1398,6 +1417,17 @@
 
       function handleAddToCart() {
         if (!currentProduct) return;
+        try {
+          if (window.fbq) {
+            fbq('track', 'AddToCart', {
+              content_name: currentProduct.title,
+              content_ids: [String(currentProduct.id)],
+              content_type: 'product',
+              value: currentProduct.price,
+              currency: 'INR'
+            });
+          }
+        } catch(e) {}
         window.Cart.addItem({
           id: currentProduct.id,
           title: currentProduct.title,
@@ -1413,6 +1443,25 @@
 
       function handleBuyNow() {
         if (!currentProduct) return;
+        try {
+          if (window.fbq) {
+            fbq('track', 'AddToCart', {
+              content_name: currentProduct.title,
+              content_ids: [String(currentProduct.id)],
+              content_type: 'product',
+              value: currentProduct.price,
+              currency: 'INR'
+            });
+            fbq('track', 'InitiateCheckout', {
+              content_name: currentProduct.title,
+              content_ids: [String(currentProduct.id)],
+              content_type: 'product',
+              value: currentProduct.price,
+              currency: 'INR',
+              num_items: 1
+            });
+          }
+        } catch(e) {}
         window.Cart.addItem({
           id: currentProduct.id,
           title: currentProduct.title,

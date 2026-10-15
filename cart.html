@@ -6,6 +6,7 @@
   <title>Cart — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
   <meta name="description" content="Your shopping cart on meesho. Review items and proceed to checkout."/>
+  <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -15,10 +16,13 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-
-  fbq('init', '2137372483528712');
+  fbq('init', '1511058947312930');
   fbq('track', 'PageView');
   </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1511058947312930&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
   <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
 </head>
 <body class="pb-32" style="background:var(--background)">
@@ -109,13 +113,29 @@
         <p style="font-size:1.35rem;font-weight:800;color:#0f172a;line-height:1">₹<span id="footer-total">0</span></p>
         <button onclick="document.getElementById('price-details').scrollIntoView({behavior:'smooth'})" style="font-size:11px;font-weight:800;color:#9f2089;margin-top:4px;cursor:pointer;background:none;border:none;padding:0;letter-spacing:0.05em">VIEW PRICE DETAILS</button>
       </div>
-      <a href="address.html" class="btn btn-primary" style="background:#9f2089;color:#ffffff;font-weight:700;font-size:0.9375rem;padding:12px 36px;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:44px">Continue</a>
+      <a href="address.html" onclick="trackCartCheckout()" class="btn btn-primary" style="background:#9f2089;color:#ffffff;font-weight:700;font-size:0.9375rem;padding:12px 36px;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;height:44px">Continue</a>
     </div>
   </div>
 
   <script src="data/products.js"></script>
   <script src="app.js"></script>
   <script>
+    function trackCartCheckout() {
+      try {
+        if (window.fbq) {
+          const items = window.Cart.getItems();
+          const { totalPrice, totalItems } = window.Cart.getTotals();
+          fbq('track', 'InitiateCheckout', {
+            value: totalPrice,
+            currency: 'INR',
+            num_items: totalItems,
+            content_ids: items.map(i => String(i.id)),
+            content_type: 'product'
+          });
+        }
+      } catch(e) {}
+    }
+
     function getReturnLabel(item) {
       const easy = item.easyReturns !== undefined ? item.easyReturns : item.price >= 119;
       return easy ? 'All issue easy returns' : 'Only wrong/defect item returns';

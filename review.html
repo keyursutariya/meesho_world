@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Review Order — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1511058947312930');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1511058947312930&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
   <meta name="description" content="Review your order before payment."/>
   <link rel="stylesheet" crossorigin href="/assets/styles-R9I6CBHq.css">
 </head>
@@ -43,12 +60,24 @@
         <p style="font-size:1.25rem;font-weight:700;line-height:1">₹<span id="footer-total">0</span></p>
         <button onclick="document.getElementById('review-price-details').scrollIntoView({behavior:'smooth'})" style="font-size:.6875rem;font-weight:700;color:var(--primary);margin-top:.375rem;cursor:pointer;text-transform:uppercase;letter-spacing:.05em">View Price Details</button>
       </div>
-      <a href="checkout.html" class="btn btn-primary btn-lg" style="min-width:9.25rem">Continue</a>
+      <a href="checkout.html" onclick="trackReviewContinue()" class="btn btn-primary btn-lg" style="min-width:9.25rem">Continue</a>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
+    function trackReviewContinue() {
+      try {
+        if (window.fbq) {
+          const totals = window.Cart ? window.Cart.getTotals() : { totalPrice: 299 };
+          fbq('track', 'InitiateCheckout', {
+            value: totals.totalPrice || 299,
+            currency: 'INR'
+          });
+        }
+      } catch(e) {}
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       const items = window.Cart.getItems();
       if (items.length === 0) { window.location.href = 'index.html'; return; }
