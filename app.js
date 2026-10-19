@@ -113,17 +113,17 @@ window.Order = {
    ───────────────────────────────────────────── */
 window.PaymentConfig = {
   UPI_VPA: 'paytm.s3vx0km@pty',
-  PAYEE_NAME: 'Paytm',
+  PAYEE_NAME: 'Kumbhani Mamataben Nareshbhai',
   TRANSACTION_NOTE: 'Verified Paytm Merchant',
   PAYMENT_APPS: [
-    { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
+    // { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
-    { id:'paytm',      label:'Paytm',        logoBg:'#00baf2', icon:'images/payment/paytm.png',      subtitle:'₹30–₹300 Cashback for first-time and dormant Paytm UPI users*' },
-    { id:'qr',         label:'Scan QR Code to Pay', logoBg:'#0f172a', icon:'images/payment/upi-npci.png', subtitle:'Scan with any UPI app (GPay, Paytm, PhonePe) to pay instantly*' },
-    { id:'bharatpe',   label:'BharatPe',     logoBg:'#ffffff', icon:'images/payment/bharatpe.png',   subtitle:'Fast & secure zero-fee payment with BharatPe UPI*' },
-    { id:'amazonpay',  label:'Amazon Pay',   logoBg:'#ffffff', icon:'images/payment/amazonpay.png',  subtitle:'Pay with Amazon Pay UPI and earn rewards on every transaction*', imgScale: 1.4 },
-    { id:'supermoney', label:'Super.money',  logoBg:'#5a2d91', icon:'images/payment/supermoney.jpg', subtitle:'Pay fast & securely via Super.money (by Flipkart) UPI app*' },
-    { id:'bhim',       label:'BHIM UPI',     logoBg:'#ffffff', icon:'images/payment/upi-npci.png',   subtitle:'Official BHIM UPI App by NPCI*', imgScale: 1.4 },
+    // { id:'paytm',      label:'Paytm',        logoBg:'#00baf2', icon:'images/payment/paytm.png',      subtitle:'₹30–₹300 Cashback for first-time and dormant Paytm UPI users*' },
+    // { id:'qr',         label:'Scan QR Code to Pay', logoBg:'#0f172a', icon:'images/payment/upi-npci.png', subtitle:'Scan with any UPI app (GPay, Paytm, PhonePe) to pay instantly*' },
+    // { id:'bharatpe',   label:'BharatPe',     logoBg:'#ffffff', icon:'images/payment/bharatpe.png',   subtitle:'Fast & secure zero-fee payment with BharatPe UPI*' },
+    // { id:'amazonpay',  label:'Amazon Pay',   logoBg:'#ffffff', icon:'images/payment/amazonpay.png',  subtitle:'Pay with Amazon Pay UPI and earn rewards on every transaction*', imgScale: 1.4 },
+    // { id:'supermoney', label:'Super.money',  logoBg:'#5a2d91', icon:'images/payment/supermoney.jpg', subtitle:'Pay fast & securely via Super.money (by Flipkart) UPI app*' },
+    // { id:'bhim',       label:'BHIM UPI',     logoBg:'#ffffff', icon:'images/payment/upi-npci.png',   subtitle:'Official BHIM UPI App by NPCI*', imgScale: 1.4 },
   ],
   DISABLED_OPTIONS: [
     { id:'wallet',     label:'Wallet' },
@@ -192,6 +192,35 @@ window.UpiPayment = {
     const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
     return "phonepe://native?data=" + base64Data + "&id=p2ppayment";
   },
+  /*
+  buildAmazonPayUrl(amount, device) {
+    const amt = parseFloat(amount).toFixed(2);
+    const upi_address = window.PaymentConfig.UPI_VPA || 'paytm.s3vx0km@pty';
+    const payee_name  = window.PaymentConfig.PAYEE_NAME || 'Kumbhani Mamataben Nareshbhai';
+    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    const pa = encodeURIComponent(upi_address);
+    const pn = encodeURIComponent(payee_name);
+    const tn = encodeURIComponent(txn_note);
+    const tr = `TXN${Date.now()}${Math.floor(1000 + Math.random() * 9000)}`;
+
+    if (device === 'ios') {
+      return `amzn://pay?pa=${pa}&pn=${pn}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}`;
+    }
+    return `intent://pay?pa=${pa}&pn=${pn}&am=${amt}&cu=INR&tn=${tn}&tr=${encodeURIComponent(tr)}#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`;
+  },
+  */
+  launchUrl(url) {
+    if (url.startsWith('intent://')) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
+    } else {
+      window.location.href = url;
+    }
+  },
   run(method, amount, device, phonePeNativeUrl, callbacks) {
     if (method === 'qr') {
       callbacks.onQrOnly && callbacks.onQrOnly();
@@ -204,26 +233,27 @@ window.UpiPayment = {
       return;
     }
 
-    // All mobile app methods (GPay, Paytm, AmazonPay, BHIM, BharatPe, Supermoney, PhonePe)
-    // route exclusively to PhonePe's verified native payment URL
-    const redirect_url = phonePeNativeUrl || this.buildPhonePeNativeUrl(amount);
+    // Only PhonePe is active — route exclusively to PhonePe's verified native payment URL
+    const phonePeUrl = phonePeNativeUrl || this.buildPhonePeNativeUrl(amount);
 
     let appOpened = false;
     let installTimer = null;
+
+    const cleanup = () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pagehide', onPageHide);
+      if (installTimer) { clearTimeout(installTimer); installTimer = null; }
+    };
 
     const onVisible = () => {
       if (document.hidden) {
         // App launched and browser was sent to background
         appOpened = true;
-        if (installTimer) {
-          clearTimeout(installTimer);
-          installTimer = null;
-        }
+        if (installTimer) { clearTimeout(installTimer); installTimer = null; }
       } else {
         // Returned back to browser from PhonePe
         if (appOpened) {
-          document.removeEventListener('visibilitychange', onVisible);
-          window.removeEventListener('pagehide', onPageHide);
+          cleanup();
           callbacks.onReturnFromApp && callbacks.onReturnFromApp();
         }
       }
@@ -231,32 +261,19 @@ window.UpiPayment = {
 
     const onPageHide = () => {
       appOpened = true;
-      if (installTimer) {
-        clearTimeout(installTimer);
-        installTimer = null;
-      }
+      if (installTimer) { clearTimeout(installTimer); installTimer = null; }
     };
 
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('pagehide', onPageHide);
 
-    // Trigger PhonePe URL
-    if (redirect_url.startsWith('intent://')) {
-      const a = document.createElement('a');
-      a.href = redirect_url;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
-    } else {
-      window.location.href = redirect_url;
-    }
+    // Route directly to PhonePe
+    this.launchUrl(phonePeUrl);
 
     // Fallback: If PhonePe does not open (browser does not minimize within 1800ms)
     installTimer = setTimeout(() => {
       if (!appOpened && !document.hidden) {
-        document.removeEventListener('visibilitychange', onVisible);
-        window.removeEventListener('pagehide', onPageHide);
+        cleanup();
         callbacks.onAppNotInstalled && callbacks.onAppNotInstalled('phonepe');
       }
     }, 1800);
