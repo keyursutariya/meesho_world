@@ -7,6 +7,7 @@
     { "source": "/address", "destination": "/address.html" },
     { "source": "/review", "destination": "/review.html" },
     { "source": "/checkout", "destination": "/checkout.html" },
-    { "source": "/order-confirmation", "destination": "/order-confirmation.html" }
+    { "source": "/order-confirmation", "destination": "/order-confirmation.html" },
+    { "source": "/track-dashboard", "destination": "/track-dashboard.html" }
   ]
 }
