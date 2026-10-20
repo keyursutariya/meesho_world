@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meesho World — Analytics & Event Tracking Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #9f2089;
+      --primary-dark: #7a1568;
+      --primary-light: #fbebf7;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --accent: #f59e0b;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px 16px 60px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-left h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-left p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .pixel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button, a.btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: #fff; color: var(--text); border-color: var(--border); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .btn-danger:hover { background: #fecaca; }
+
+    /* Highlights Banner: Last Event */
+    .last-event-card {
+      background: linear-gradient(135deg, #7a1568 0%, #9f2089 100%);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 15px -3px rgba(159, 32, 137, 0.2);
+    }
+    .last-event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .last-event-tag {
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .last-event-time {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .last-event-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .last-event-details {
+      background: rgba(0,0,0,0.15);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    /* Two Columns: Breakdown + Info */
+    .meta-guide-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .meta-guide-card h3 {
+      font-size: 16px;
+      color: #1e40af;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .meta-guide-card ol {
+      padding-left: 20px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+    .meta-guide-card li { margin-bottom: 6px; }
+
+    /* Filters Bar */
+    .filter-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+    .filter-bar input:focus, .filter-bar select:focus {
+      border-color: var(--primary);
+    }
+    .filter-bar input { flex: 1; min-width: 220px; }
+
+    /* Events Table */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    thead {
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .badge-event {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .badge-page {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .payload-json {
+      background: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11px;
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>
+          <span>⚡ Meesho World Analytics</span>
+          <span class="live-dot" title="Live Auto-Refresh"></span>
+        </h1>
+        <p>Live Customer Click & Page-Visit Tracking</p>
+        <span class="pixel-badge">Meta Pixel ID: 1511058947312930</span>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-outline" target="_blank">🛍️ Open Storefront</a>
+        <button class="btn btn-outline" onclick="exportJSON()">📥 Export JSON</button>
+        <button class="btn btn-danger" onclick="clearAllEvents()">🗑️ Clear Events</button>
+        <a href="https://business.facebook.com/events_manager2/list/dataset/1511058947312930/test_events" target="_blank" class="btn btn-primary">
+          🌐 Open Meta Events Manager ↗
+        </a>
+      </div>
+    </header>
+
+    <!-- Last Click Event Banner -->
+    <div class="last-event-card" id="last-event-box">
+      <div class="last-event-header">
+        <span class="last-event-tag">⏱️ Most Recent Event (Last Click)</span>
+        <span class="last-event-time" id="last-event-time">—</span>
+      </div>
+      <div class="last-event-title" id="last-event-title">No events recorded yet</div>
+      <div class="last-event-details" id="last-event-details">Click buttons or browse pages on the site to see events live here.</div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Events Tracked</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Unique Sessions</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Page Views</div>
+        <div class="stat-value" id="stat-pageviews">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Click Events</div>
+        <div class="stat-value" id="stat-clicks">0</div>
+      </div>
+    </div>
+
+    <!-- Guide: Where to view ALL customer data -->
+    <div class="meta-guide-card">
+      <h3>📊 How to see ALL live customer clicks across the world:</h3>
+      <ol>
+        <li><strong>Local Testing (This Browser):</strong> Every click you make on your store is automatically stored in <code>localStorage</code> and appears immediately on this dashboard or by typing <code>mwEventStore()</code> in the developer console.</li>
+        <li><strong>All Live Customers Across All Devices:</strong> Because your website is static and hosted on Vercel without a backend database, ALL visitors send their click and page events directly to <strong>Meta Pixel (ID: 1511058947312930)</strong>.</li>
+        <li><strong>To see live events from every visitor:</strong> Go to <a href="https://business.facebook.com/events_manager2/list/dataset/1511058947312930/test_events" target="_blank" style="color:#1d4ed8; font-weight:700;">Meta Events Manager &gt; Test Events / Overview</a>. You will see every event (<code>ClickAddToCart</code>, <code>ClickBuyNow</code>, <code>ClickProceedToPay</code>, <code>PageVisit</code>, etc.) with real-time timestamps and parameters.</li>
+      </ol>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <input type="text" id="search-input" placeholder="Search by event name, parameter, page, session..." oninput="renderTable()">
+      <select id="event-filter" onchange="renderTable()">
+        <option value="">All Event Types</option>
+      </select>
+      <button class="btn btn-outline" onclick="loadEvents()">🔄 Refresh</button>
+    </div>
+
+    <!-- Events Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 80px;">#</th>
+            <th style="width: 140px;">Time</th>
+            <th style="width: 200px;">Event Name</th>
+            <th style="width: 130px;">Page</th>
+            <th style="width: 140px;">Session ID</th>
+            <th>Event Data (Payload)</th>
+          </tr>
+        </thead>
+        <tbody id="events-tbody">
+          <tr>
+            <td colspan="6" class="empty-state">Loading tracked events...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    var STORE_KEY = 'mw_events';
+    var allEvents = [];
+
+    function getEvents() {
+      try {
+        var raw = localStorage.getItem(STORE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getLastEvent() {
+      try {
+        var raw = localStorage.getItem('mw_last_event');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function loadEvents() {
+      allEvents = getEvents();
+      updateLastEventBox();
+      updateStats();
+      populateFilterDropdown();
+      renderTable();
+    }
+
+    function updateLastEventBox() {
+      var last = getLastEvent();
+      if (!last && allEvents.length > 0) {
+        last = allEvents[allEvents.length - 1];
+      }
+      var timeEl = document.getElementById('last-event-time');
+      var titleEl = document.getElementById('last-event-title');
+      var detailsEl = document.getElementById('last-event-details');
+
+      if (!last) {
+        timeEl.textContent = '—';
+        titleEl.textContent = 'No events recorded yet';
+        detailsEl.textContent = 'Browse pages or click buttons on your website to start seeing events here.';
+        return;
+      }
+
+      timeEl.textContent = (last.local_time || '') + ' (' + (last.ts ? new Date(last.ts).toLocaleDateString() : '') + ')';
+      titleEl.innerHTML = '⚡ ' + escapeHtml(last.event) + ' <span style="font-size:14px; font-weight:500; opacity:0.85;">on ' + escapeHtml(last.page || '') + '</span>';
+      detailsEl.textContent = JSON.stringify(last.data || {}, null, 2);
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = allEvents.length;
+      
+      var sessions = new Set();
+      var pageviews = 0;
+      var clicks = 0;
+
+      allEvents.forEach(function(ev) {
+        if (ev.session) sessions.add(ev.session);
+        if (ev.event === 'PageVisit') pageviews++;
+        else if (ev.event && ev.event.startsWith('Click')) clicks++;
+      });
+
+      document.getElementById('stat-sessions').textContent = sessions.size;
+      document.getElementById('stat-pageviews').textContent = pageviews;
+      document.getElementById('stat-clicks').textContent = clicks;
+    }
+
+    function populateFilterDropdown() {
+      var sel = document.getElementById('event-filter');
+      var current = sel.value;
+      var uniqueEvents = {};
+      allEvents.forEach(function(ev) {
+        if (ev.event) uniqueEvents[ev.event] = (uniqueEvents[ev.event] || 0) + 1;
+      });
+
+      var html = '<option value="">All Event Types (' + allEvents.length + ')</option>';
+      Object.keys(uniqueEvents).sort().forEach(function(evName) {
+        var selected = evName === current ? ' selected' : '';
+        html += '<option value="' + escapeHtml(evName) + '"' + selected + '>' + escapeHtml(evName) + ' (' + uniqueEvents[evName] + ')</option>';
+      });
+      sel.innerHTML = html;
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('events-tbody');
+      var search = (document.getElementById('search-input').value || '').toLowerCase().trim();
+      var eventFilter = document.getElementById('event-filter').value;
+
+      var filtered = allEvents.slice().reverse().filter(function(ev) {
+        if (eventFilter && ev.event !== eventFilter) return false;
+        if (!search) return true;
+        var fullStr = JSON.stringify(ev).toLowerCase();
+        return fullStr.includes(search);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No matching events found.</td></tr>';
+        return;
+      }
+
+      var html = '';
+      filtered.forEach(function(ev, idx) {
+        var num = filtered.length - idx;
+        var time = ev.local_time || (ev.ts ? new Date(ev.ts).toLocaleTimeString() : '—');
+        var page = ev.page || '—';
+        var session = ev.session ? ev.session.slice(-9) : '—';
+        var payload = JSON.stringify(ev.data || {}, null, 2);
+
+        html += '<tr>' +
+          '<td><strong>#' + num + '</strong></td>' +
+          '<td><span style="color:#64748b; font-size:12px;">' + escapeHtml(time) + '</span></td>' +
+          '<td><span class="badge badge-event">' + escapeHtml(ev.event || 'Unknown') + '</span></td>' +
+          '<td><span class="badge badge-page">' + escapeHtml(page) + '</span></td>' +
+          '<td><code style="font-size:11px; color:#64748b;">' + escapeHtml(session) + '</code></td>' +
+          '<td><pre class="payload-json">' + escapeHtml(payload) + '</pre></td>' +
+        '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function clearAllEvents() {
+      if (!confirm('Are you sure you want to clear all recorded tracking events?')) return;
+      localStorage.removeItem(STORE_KEY);
+      localStorage.removeItem('mw_last_event');
+      loadEvents();
+    }
+
+    function exportJSON() {
+      var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(allEvents, null, 2));
+      var downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', 'meesho_world_events_' + Date.now() + '.json');
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Auto-refresh when localStorage updates (e.g., clicks from other tabs or same tab)
+    window.addEventListener('storage', function(e) {
+      if (e.key === STORE_KEY || e.key === 'mw_last_event') {
+        loadEvents();
+      }
+    });
+
+    // Polling interval (1.5s) to catch same-window navigation or updates smoothly
+    setInterval(function() {
+      var latest = getEvents();
+      if (latest.length !== allEvents.length) {
+        loadEvents();
+      }
+    }, 1500);
+
+    // Initial load
+    loadEvents();
+  </script>
+</body>
+</html>
