@@ -6,6 +6,8 @@
   <title>Payment Method — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
   <meta name="description" content="Select a payment method and place your order."/>
+  <!-- Central Config (must be first) -->
+  <script src="config.js"></script>
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -16,7 +18,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1511058947312930');
+  var _pid=(window.APP_CONFIG&&window.APP_CONFIG.META_PIXEL_ID)||'1511058947312930';
+  fbq('init', _pid);
   fbq('track', 'PageView');
   fbq('track', 'InitiateCheckout');
   </script>
@@ -171,7 +174,7 @@
               </div>
               <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
                 <span style="color:#64748b">UPI ID:</span>
-                <b id="qr-vpa" style="color:#0f172a">paytm.s3vx0km@pty</b>
+                <b id="qr-vpa" style="color:#0f172a">Loading...</b>
               </div>
               <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
                 <span style="color:#64748b">Note:</span>
@@ -246,6 +249,7 @@
     let pricing = {};
 
     document.addEventListener('DOMContentLoaded', function() {
+      if (window.applyConfigPrices) window.applyConfigPrices();
       const items = window.Cart.getItems();
       if (items.length === 0) { window.location.href = 'index.html'; return; }
       const addr = window.DeliveryAddress.load();

@@ -4,6 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
+  <!-- Central Config (must be first) -->
+  <script src="config.js"></script>
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -14,7 +16,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1511058947312930');
+  var _pid=(window.APP_CONFIG&&window.APP_CONFIG.META_PIXEL_ID)||'1511058947312930';
+  fbq('init', _pid);
   fbq('track', 'PageView');
   </script>
   <noscript><img height="1" width="1" style="display:none"
@@ -65,27 +68,27 @@
   <main class="w-full" style="margin:0;padding:0;">
     <!-- Top marquee bar with background color #970e71 -->
     <div class="top-marquee-bar" onclick="openProductPage(event, 10004)" style="cursor:pointer;background-color:#970e71 !important;color:#ffffff !important;" title="Click to view 3-Pcs Combo Offer">
-      <div class="marquee__inner">
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+      <div class="marquee__inner" id="marquee-inner-1">
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
       </div>
-      <div class="marquee__inner" aria-hidden="true">
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+      <div class="marquee__inner" aria-hidden="true" id="marquee-inner-2">
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
         <span>&nbsp;</span>
-        <span>LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
+        <span class="marquee-promo-text">LAST DAY SALE AT 3 PIC COMBO PRICE 799/- ONLY</span>
       </div>
     </div>
 
@@ -242,6 +245,15 @@
   <script src="app.js"></script>
   <script src="tracking.js"></script>
   <script>
+    /* ── Update marquee text from APP_CONFIG ── */
+    (function() {
+      var price3pc = (window.APP_CONFIG && window.APP_CONFIG.PRICE_3PC) || 799;
+      var text = 'LAST DAY SALE AT 3 PIC COMBO PRICE ' + price3pc + '/- ONLY';
+      document.querySelectorAll('.marquee-promo-text').forEach(function(el) {
+        el.textContent = text;
+      });
+    })();
+
     /* ── Daily deals countdown matching React ── */
     (function() {
       const target = new Date();
@@ -327,6 +339,7 @@
     }
 
     function initFeed() {
+      if (window.applyConfigPrices) window.applyConfigPrices();
       allProducts = window.PRODUCTS || [];
       filteredProducts = allProducts;
       const countEl = document.getElementById('product-count');

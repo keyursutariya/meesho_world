@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meesho World — Analytics & Event Tracking Dashboard</title>
+  <!-- Central Config (must be first) -->
+  <script src="config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -306,13 +308,13 @@
           <span class="live-dot" title="Live Auto-Refresh"></span>
         </h1>
         <p>Live Customer Click & Page-Visit Tracking</p>
-        <span class="pixel-badge">Meta Pixel ID: 1511058947312930</span>
+        <span class="pixel-badge" id="pixel-badge-el">Meta Pixel ID: Loading...</span>
       </div>
       <div class="header-actions">
         <a href="index.html" class="btn btn-outline" target="_blank">🛍️ Open Storefront</a>
         <button class="btn btn-outline" onclick="exportJSON()">📥 Export JSON</button>
         <button class="btn btn-danger" onclick="clearAllEvents()">🗑️ Clear Events</button>
-        <a href="https://business.facebook.com/events_manager2/list/dataset/1511058947312930/test_events" target="_blank" class="btn btn-primary">
+        <a id="meta-manager-link" href="https://business.facebook.com/events_manager2/" target="_blank" class="btn btn-primary">
           🌐 Open Meta Events Manager ↗
         </a>
       </div>
@@ -353,8 +355,8 @@
       <h3>📊 How to see ALL live customer clicks across the world:</h3>
       <ol>
         <li><strong>Local Testing (This Browser):</strong> Every click you make on your store is automatically stored in <code>localStorage</code> and appears immediately on this dashboard or by typing <code>mwEventStore()</code> in the developer console.</li>
-        <li><strong>All Live Customers Across All Devices:</strong> Because your website is static and hosted on Vercel without a backend database, ALL visitors send their click and page events directly to <strong>Meta Pixel (ID: 1511058947312930)</strong>.</li>
-        <li><strong>To see live events from every visitor:</strong> Go to <a href="https://business.facebook.com/events_manager2/list/dataset/1511058947312930/test_events" target="_blank" style="color:#1d4ed8; font-weight:700;">Meta Events Manager &gt; Test Events / Overview</a>. You will see every event (<code>ClickAddToCart</code>, <code>ClickBuyNow</code>, <code>ClickProceedToPay</code>, <code>PageVisit</code>, etc.) with real-time timestamps and parameters.</li>
+        <li><strong>All Live Customers Across All Devices:</strong> Because your website is static and hosted on Vercel without a backend database, ALL visitors send their click and page events directly to <strong>Meta Pixel (ID: <span id="guide-pixel-id">...</span>)</strong>.</li>
+        <li><strong>To see live events from every visitor:</strong> Go to <a id="guide-meta-link" href="https://business.facebook.com/events_manager2/" target="_blank" style="color:#1d4ed8; font-weight:700;">Meta Events Manager &gt; Test Events / Overview</a>. You will see every event (<code>ClickAddToCart</code>, <code>ClickBuyNow</code>, <code>ClickProceedToPay</code>, <code>PageVisit</code>, etc.) with real-time timestamps and parameters.</li>
       </ol>
     </div>
 
@@ -411,7 +413,20 @@
       }
     }
 
+    function initPixelInfo() {
+      var pid = (window.APP_CONFIG && window.APP_CONFIG.META_PIXEL_ID) || '1511058947312930';
+      var badge = document.getElementById('pixel-badge-el');
+      if (badge) badge.textContent = 'Meta Pixel ID: ' + pid;
+      var guidePid = document.getElementById('guide-pixel-id');
+      if (guidePid) guidePid.textContent = pid;
+      var link = document.getElementById('meta-manager-link');
+      if (link) link.href = 'https://business.facebook.com/events_manager2/list/dataset/' + pid + '/test_events';
+      var guideLink = document.getElementById('guide-meta-link');
+      if (guideLink) guideLink.href = 'https://business.facebook.com/events_manager2/list/dataset/' + pid + '/test_events';
+    }
+
     function loadEvents() {
+      initPixelInfo();
       allEvents = getEvents();
       updateLastEventBox();
       updateStats();

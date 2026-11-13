@@ -19,7 +19,7 @@
   window.__mwTrackingV3 = true;
 
   /* ── CONFIG ── */
-  var PIXEL_ID     = '1511058947312930';
+  var PIXEL_ID     = (window.APP_CONFIG && window.APP_CONFIG.META_PIXEL_ID) || '1511058947312930';
   var DEBOUNCE_MS  = 300;
   var DEDUP_MS     = 2000;
   var STORE_KEY    = 'mw_events';

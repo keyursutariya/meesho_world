@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Central Config (must be first) -->
+    <script src="config.js"></script>
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -13,7 +15,8 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1511058947312930');
+    var _pid=(window.APP_CONFIG&&window.APP_CONFIG.META_PIXEL_ID)||'1511058947312930';
+    fbq('init', _pid);
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none"
@@ -1113,6 +1116,8 @@
           return;
         }
 
+        if (window.applyConfigPrices) window.applyConfigPrices();
+
         const rawId = getSelectedProductId();
         const allProducts = window.PRODUCTS || [];
 
@@ -1430,6 +1435,7 @@
         } catch(e) {}
         window.Cart.addItem({
           id: currentProduct.id,
+          slug: currentProduct.slug,
           title: currentProduct.title,
           image: currentProduct.image,
           price: currentProduct.price,
@@ -1464,6 +1470,7 @@
         } catch(e) {}
         window.Cart.addItem({
           id: currentProduct.id,
+          slug: currentProduct.slug,
           title: currentProduct.title,
           image: currentProduct.image,
           price: currentProduct.price,

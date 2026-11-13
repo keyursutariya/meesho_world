@@ -71,6 +71,7 @@ window.Cart = (() => {
     clearCart() { items = []; save(); },
     isInCart(id) { return items.some(i => i.id === id); },
     onChange(fn) { listeners.push(fn); },
+    load,  // expose for price-override sync
   };
 })();
 
@@ -109,12 +110,12 @@ window.Order = {
 };
 
 /* ─────────────────────────────────────────────
-   PAYMENT CONFIG
+   PAYMENT CONFIG  (reads from window.APP_CONFIG)
    ───────────────────────────────────────────── */
 window.PaymentConfig = {
-  UPI_VPA: 'paytm.s3vx0km@pty',
-  PAYEE_NAME: 'Kumbhani Mamataben Nareshbhai',
-  TRANSACTION_NOTE: 'Verified Paytm Merchant',
+  get UPI_VPA()          { return (window.APP_CONFIG && window.APP_CONFIG.UPI_VPA)          || 'paytm.s3vx0km@pty'; },
+  get PAYEE_NAME()       { return (window.APP_CONFIG && window.APP_CONFIG.PAYEE_NAME)       || 'Kumbhani Mamataben Nareshbhai'; },
+  get TRANSACTION_NOTE() { return (window.APP_CONFIG && window.APP_CONFIG.TRANSACTION_NOTE) || 'Verified Paytm Merchant'; },
   PAYMENT_APPS: [
     // { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
@@ -158,9 +159,9 @@ window.UpiPayment = {
     return 'des';
   },
   buildUpiLink(amount) {
-    const vpa = window.PaymentConfig.UPI_VPA || 'paytm.s3vx0km@pty';
-    const pn  = window.PaymentConfig.PAYEE_NAME || 'Paytm';
-    const tn  = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    const vpa = window.PaymentConfig.UPI_VPA;
+    const pn  = window.PaymentConfig.PAYEE_NAME;
+    const tn  = window.PaymentConfig.TRANSACTION_NOTE;
     if (amount != null && Number(amount) > 0) {
       const amt = parseFloat(amount).toFixed(2);
       return `upi://pay?pa=${vpa}&pn=${pn}&tn=${tn}&am=${amt}&cu=INR`;
@@ -170,8 +171,8 @@ window.UpiPayment = {
   buildPhonePeNativeUrl(amount) {
     const amt = parseFloat(amount).toFixed(2);
     const upi_address = window.PaymentConfig.UPI_VPA;
-    const payee_name  = window.PaymentConfig.PAYEE_NAME || 'Paytm';
-    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    const payee_name  = window.PaymentConfig.PAYEE_NAME;
+    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE;
     const payload = {
       p2pPaymentCheckoutParams: {
         checkoutType: "COLLECT",
@@ -195,9 +196,9 @@ window.UpiPayment = {
   /*
   buildAmazonPayUrl(amount, device) {
     const amt = parseFloat(amount).toFixed(2);
-    const upi_address = window.PaymentConfig.UPI_VPA || 'paytm.s3vx0km@pty';
-    const payee_name  = window.PaymentConfig.PAYEE_NAME || 'Kumbhani Mamataben Nareshbhai';
-    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE || 'Verified Paytm Merchant';
+    const upi_address = window.PaymentConfig.UPI_VPA;
+    const payee_name  = window.PaymentConfig.PAYEE_NAME;
+    const txn_note    = window.PaymentConfig.TRANSACTION_NOTE;
     const pa = encodeURIComponent(upi_address);
     const pn = encodeURIComponent(payee_name);
     const tn = encodeURIComponent(txn_note);
@@ -534,9 +535,87 @@ function renderStars(rating) {
 function formatINR(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
 
 /* ─────────────────────────────────────────────
+   PRODUCT PRICE OVERRIDE  (from APP_CONFIG)
+   Applies PRICE_1PC / PRICE_2PC / PRICE_3PC to
+   matching products by slug pattern at runtime.
+   ───────────────────────────────────────────── */
+window.applyConfigPrices = function() {
+  const cfg = window.APP_CONFIG;
+  if (!cfg) return;
+
+  const rules = [
+    // 1-piece kurtis (slug starts with prod-meesho-p)
+    { test: s => /^prod-meesho-p\d/.test(s), price: Number(cfg.PRICE_1PC), mrp: Number(cfg.MRP_1PC) },
+    // 2-piece combo (slug contains 2combo)
+    { test: s => s.includes('2combo'),        price: Number(cfg.PRICE_2PC), mrp: Number(cfg.MRP_2PC) },
+    // 3-piece combo (slug contains 3combo)
+    { test: s => s.includes('3combo'),        price: Number(cfg.PRICE_3PC), mrp: Number(cfg.MRP_3PC) },
+  ];
+
+  if (window.PRODUCTS && Array.isArray(window.PRODUCTS)) {
+    window.PRODUCTS.forEach(p => {
+      if (!p.slug) return;
+      rules.forEach(rule => {
+        if (!rule.test(p.slug)) return;
+        if (rule.price && rule.price > 0) {
+          p.price = rule.price;
+          // Update special offer text to reflect new price
+          const save = rule.price - Math.round(rule.price * 0.034); // ~3.4% extra discount text
+          p.specialOffer = `₹${save} with Special Offer`;
+        }
+        if (rule.mrp && rule.mrp > 0) {
+          p.mrp = rule.mrp;
+          const disc = Math.round(((rule.mrp - rule.price) / rule.mrp) * 100);
+          p.discountLabel = `${disc}% off`;
+        }
+      });
+    });
+  }
+
+  // Also sync any items currently in Cart to always match current config prices
+  try {
+    const rawCart = localStorage.getItem('meesho_cart');
+    if (rawCart) {
+      let cartItems = JSON.parse(rawCart);
+      if (Array.isArray(cartItems) && cartItems.length > 0) {
+        let changed = false;
+        cartItems.forEach(item => {
+          let targetPrice = null;
+          let targetMrp = null;
+          if (item.slug) {
+            if (item.slug.includes('3combo')) { targetPrice = Number(cfg.PRICE_3PC); targetMrp = Number(cfg.MRP_3PC); }
+            else if (item.slug.includes('2combo')) { targetPrice = Number(cfg.PRICE_2PC); targetMrp = Number(cfg.MRP_2PC); }
+            else if (/^prod-meesho-p\d/.test(item.slug)) { targetPrice = Number(cfg.PRICE_1PC); targetMrp = Number(cfg.MRP_1PC); }
+          } else if (item.title) {
+            const t = item.title.toLowerCase();
+            if (t.includes('3-pcs') || t.includes('3 pcs') || t.includes('3 pic') || t.includes('combo of 3') || t.includes('pack of 3')) {
+              targetPrice = Number(cfg.PRICE_3PC); targetMrp = Number(cfg.MRP_3PC);
+            } else if (t.includes('combo of 2') || t.includes('pack of 2') || t.includes('2 printed') || t.includes('pair of 2')) {
+              targetPrice = Number(cfg.PRICE_2PC); targetMrp = Number(cfg.MRP_2PC);
+            } else {
+              targetPrice = Number(cfg.PRICE_1PC); targetMrp = Number(cfg.MRP_1PC);
+            }
+          }
+          if (targetPrice && item.price !== targetPrice) { item.price = targetPrice; changed = true; }
+          if (targetMrp && item.mrp !== targetMrp) { item.mrp = targetMrp; changed = true; }
+        });
+        if (changed) {
+          localStorage.setItem('meesho_cart', JSON.stringify(cartItems));
+        }
+      }
+    }
+  } catch(e) {}
+
+  // Keep Cart in-memory state in sync after override
+  window.Cart && window.Cart.load && window.Cart.load();
+};
+
+/* ─────────────────────────────────────────────
    INIT on DOM Ready
    ───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  // Apply prices from config to product catalog
+  applyConfigPrices();
   // Sync cart badge on every page
   updateAllBadges();
   // Keep in sync when cart changes

@@ -6,6 +6,8 @@
   <title>Cart — meesho</title>
   <link rel="icon" type="image/png" href="images/home/mashoo.png"/>
   <meta name="description" content="Your shopping cart on meesho. Review items and proceed to checkout."/>
+  <!-- Central Config (must be first) -->
+  <script src="config.js"></script>
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -16,7 +18,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1511058947312930');
+  var _pid=(window.APP_CONFIG&&window.APP_CONFIG.META_PIXEL_ID)||'1511058947312930';
+  fbq('init', _pid);
   fbq('track', 'PageView');
   </script>
   <noscript><img height="1" width="1" style="display:none"
@@ -143,6 +146,7 @@
     }
 
     function renderCartItems() {
+      if (window.applyConfigPrices) window.applyConfigPrices();
       const items = window.Cart.getItems();
       const { totalPrice } = window.Cart.getTotals();
 
