@@ -26,9 +26,9 @@ window.APP_CONFIG = {
   META_PIXEL_ID: '1511058947312930',
 
   /* ── UPI Payment Credentials ───────────────────────── */
-  UPI_VPA:          'paytm.s3vx0km@pty',
-  PAYEE_NAME:       'Kumbhani Mamataben Nareshbhai',
-  TRANSACTION_NOTE: 'Verified Paytm Merchant',
+  UPI_VPA:          'paytm.s27xjuv@pty',
+  PAYEE_NAME:       'Paytm',
+  TRANSACTION_NOTE: 'Verified Paytm Account',
 
   /* ── Kurti Combo Prices (applied at runtime) ────────── */
   // These override prices for products by slug pattern:

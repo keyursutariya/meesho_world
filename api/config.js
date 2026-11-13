@@ -2,9 +2,9 @@
 module.exports = (req, res) => {
   const cfg = {
     META_PIXEL_ID:    process.env.META_PIXEL_ID    || '1511058947312930',
-    UPI_VPA:          process.env.UPI_VPA           || 'paytm.s3vx0km@pty',
-    PAYEE_NAME:       process.env.PAYEE_NAME        || 'Kumbhani Mamataben Nareshbhai',
-    TRANSACTION_NOTE: process.env.TRANSACTION_NOTE  || 'Verified Paytm Merchant',
+    UPI_VPA:          process.env.UPI_VPA           || 'paytm.s27xjuv@pty',
+    PAYEE_NAME:       process.env.PAYEE_NAME        || 'Paytm',
+    TRANSACTION_NOTE: process.env.TRANSACTION_NOTE  || 'Verified Paytm Account',
     PRICE_1PC:        Number(process.env.PRICE_1PC) || 299,
     PRICE_2PC:        Number(process.env.PRICE_2PC) || 499,
     PRICE_3PC:        Number(process.env.PRICE_3PC) || 799,

@@ -113,9 +113,9 @@ window.Order = {
    PAYMENT CONFIG  (reads from window.APP_CONFIG)
    ───────────────────────────────────────────── */
 window.PaymentConfig = {
-  get UPI_VPA()          { return (window.APP_CONFIG && window.APP_CONFIG.UPI_VPA)          || 'paytm.s3vx0km@pty'; },
-  get PAYEE_NAME()       { return (window.APP_CONFIG && window.APP_CONFIG.PAYEE_NAME)       || 'Kumbhani Mamataben Nareshbhai'; },
-  get TRANSACTION_NOTE() { return (window.APP_CONFIG && window.APP_CONFIG.TRANSACTION_NOTE) || 'Verified Paytm Merchant'; },
+  get UPI_VPA()          { return (window.APP_CONFIG && window.APP_CONFIG.UPI_VPA)          || 'paytm.s27xjuv@pty'; },
+  get PAYEE_NAME()       { return (window.APP_CONFIG && window.APP_CONFIG.PAYEE_NAME)       || 'Paytm'; },
+  get TRANSACTION_NOTE() { return (window.APP_CONFIG && window.APP_CONFIG.TRANSACTION_NOTE) || 'Verified Paytm Account'; },
   PAYMENT_APPS: [
     // { id:'gpay',       label:'Google Pay',   logoBg:'#4285f4', icon:'images/payment/gpay.png',       subtitle:'Fast and secure direct checkout using Google Pay app*' },
     { id:'phonepe',    label:'PhonePe',      logoBg:'#5f259f', icon:'images/payment/phonepe.png',    subtitle:'Upto ₹100 cashback on RuPay Credit Card on UPI using PhonePe*' },
