@@ -1,0 +1,10 @@
+{
+  "name": "meesho_world",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build-config.js",
+    "start": "node server.js"
+  }
+}
+
